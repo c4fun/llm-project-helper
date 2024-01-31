@@ -8,11 +8,38 @@ class PythonParser(ast.NodeVisitor):
             "imports": [],
             "classes": {}, 
             "functions": {}, 
-            "global_variables": []
+            "global_variables": [],
+            "main_block": []
         }
         self.current_class = None
         self.current_method = None
         self.current_function = None
+        self.in_main_block = False
+
+    def visit_If(self, node):
+        # Check if this is the main block
+        if (isinstance(node.test, ast.Compare) and 
+            isinstance(node.test.left, ast.Name) and 
+            node.test.left.id == "__name__" and 
+            isinstance(node.test.comparators[0], ast.Str) and 
+            node.test.comparators[0].s == "__main__"):
+            self.in_main_block = True
+            for stmt in node.body:
+                self.visit(stmt)
+            self.in_main_block = False
+        else:
+            self.generic_visit(node)
+
+    def visit_Expr(self, node):
+        if self.in_main_block:
+            if hasattr(node.value, 's'):
+                self.structure["main_block"].append(node.value.s)
+        self.generic_visit(node)
+
+    def visit_Call(self, node):
+        if self.in_main_block:
+            self.structure["main_block"].append(ast.unparse(node))
+        self.generic_visit(node)
 
     def visit_Import(self, node):
         for name in node.names:
