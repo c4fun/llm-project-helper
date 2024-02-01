@@ -2,6 +2,8 @@ import os
 import json
 from dotenv import load_dotenv
 from llm_project_helper.parser.python_parser import python_analyze_code
+from loguru import logger
+TREE_JSON = True
 
 class RepoTraverser:
     def __init__(self):
@@ -19,7 +21,7 @@ class RepoTraverser:
         cur_ws_dir = os.path.join(workspaces_dir, repo_name)
         # create workspaces_dir if not exists
         if not os.path.exists(cur_ws_dir):
-            print(f'Creating workspaces_dir: {cur_ws_dir}')
+            logger.debug(f'Creating workspaces_dir: {cur_ws_dir}')
             os.makedirs(cur_ws_dir)
 
         for root, dirs, files in os.walk(self.repo_path):
@@ -36,10 +38,22 @@ class RepoTraverser:
 
                     # Output the result to a json file
                     output['relative_path'] = relative_path
+                    
                     json_file = relative_path.replace(os.sep, '--').replace('.', '--') + '.json'
+
+                    if TREE_JSON:
+                        # separate the folder and *.py from relative_path by os.sep
+                        py_path = relative_path.split(os.sep)[-1]
+                        folder_path = relative_path.replace(py_path, '')
+
+                        cur_file_path = os.path.join(cur_ws_dir, folder_path)
+                        if not os.path.exists(cur_file_path):
+                            logger.debug(f'Creating folder: {cur_file_path}')
+                            os.makedirs(cur_file_path)
+                        json_file = os.path.join(cur_file_path, py_path.replace('.', '--') + '.json')
                     with open(os.path.join(cur_ws_dir, json_file), 'w') as f:
                         json.dump(output, f, indent=4)
 
                 except Exception as e:
-                    print(f"Error reading file {file_path}: {e}")
+                    logger.error(f"Error reading file {file_path}: {e}")
 

@@ -1,1 +1,2 @@
 python-dotenv
+loguru==0.7.2
