@@ -2,6 +2,7 @@ from zhipuai import ZhipuAI
 
 import os
 from dotenv import load_dotenv
+from llm_project_helper.logs import logger
 
 class ZhipuAIAPI:
     def __init__(self):
@@ -20,6 +21,15 @@ class ZhipuAIAPI:
             history_zhipuai_format.append({"role": "user", "content": human })
             history_zhipuai_format.append({"role": "assistant", "content":assistant})
         return history_zhipuai_format
+    
+    def record_usage(self, response):
+        """
+        Record the usage of the response
+        """
+        usage = response.usage
+        logger.info(f"prompt_tokens usage: {usage.prompt_tokens}")
+        logger.info(f"completion_tokens usage: {usage.completion_tokens}")
+        logger.info(f"total_tokens usage: {usage.total_tokens}")
 
     def predict(self, message, history=[]):
         """
@@ -34,6 +44,7 @@ class ZhipuAIAPI:
             stream=False
         )
 
+        self.record_usage(response=response)
         return response.choices[0].message
 
     def predict_sse(self, message, history=[]):
@@ -55,4 +66,5 @@ class ZhipuAIAPI:
                 partial_message = partial_message + chunk.choices[0].delta.content
                 yield partial_message
 
+        self.record_usage(response=response)
         return partial_message
