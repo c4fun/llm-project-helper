@@ -39,7 +39,7 @@ class RepoTraverser:
                     # Output the result to a json file
                     output['relative_path'] = relative_path
                     
-                    json_file = relative_path.replace(os.sep, '--').replace('.', '--') + '.json'
+                    json_file = relative_path.replace(os.sep, '--') + '.json'
 
                     if TREE_JSON:
                         # separate the folder and *.py from relative_path by os.sep
@@ -50,7 +50,7 @@ class RepoTraverser:
                         if not os.path.exists(cur_file_path):
                             logger.debug(f'Creating folder: {cur_file_path}')
                             os.makedirs(cur_file_path)
-                        json_file = os.path.join(cur_file_path, py_path.replace('.', '--') + '.json')
+                        json_file = os.path.join(cur_file_path, py_path + '.json')
                     with open(os.path.join(cur_ws_dir, json_file), 'w') as f:
                         json.dump(output, f, indent=4)
 
