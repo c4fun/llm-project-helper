@@ -6,7 +6,7 @@
     - Use a TREE_JSON to alternate between tree and list modes
 - [ ] Use a public LLM to comment
     - [x] Use ZhipuAI LLM API
-        - 对于两项多行的超长类，GLM4已经忘了自己的注释的目标，没有写任何注释
+        - 对于2000行的超长类，GLM4已经忘了自己的注释的目标，没有写任何注释。这样来看，一个类并不适合直接放在一个对话框中分析。而且这种超长context也非常烧钱（特别是GLM是把input token跟output token一起算的）
     - [ ] Comment the whole file
         - [ ] Solve the incomplete big file problem in ZhipuAI's API: 
             - The file is only 100 line. It's not too big at all. Some functions and most classes have more code than that.
