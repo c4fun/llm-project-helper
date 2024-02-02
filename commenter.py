@@ -6,8 +6,8 @@ from llm_project_helper.logs import logger
 
 if __name__ == '__main__':
 
-    # file_path = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'  # 返回不全
-    file_path = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
+    file_path = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'  # 返回不全
+    # file_path = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
     expanded_path = os.path.expanduser(file_path)
 
     # test if the comment method is working
