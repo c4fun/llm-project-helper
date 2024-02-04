@@ -31,6 +31,22 @@ class ZhipuAIAPI:
         logger.info(f"completion_tokens usage: {usage.completion_tokens}")
         logger.info(f"total_tokens usage: {usage.total_tokens}")
 
+    def predict_with_history(self, message, history=[]):
+        """
+        Predict using sse and stream is true
+        """
+        history.append({"role": "user", "content": message})
+        logger.debug(f"history: {history}")
+
+        response = self.client.chat.completions.create(
+            model='glm-4',
+            messages= history,
+            stream=False
+        )
+
+        self.record_usage(response=response)
+        return response.choices[0].message
+
     def predict(self, message, history=[]):
         """
         Predict using sse and stream is true

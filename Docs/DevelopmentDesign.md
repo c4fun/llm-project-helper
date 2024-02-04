@@ -9,9 +9,9 @@
     - [x] Use ZhipuAI LLM API
         - 对于2000行的超长类，GLM4已经忘了自己的注释的目标，没有写任何注释。这样来看，一个类并不适合直接放在一个对话框中分析。而且这种超长context也非常烧钱（特别是GLM是把input token跟output token一起算的）
     - [ ] Comment the whole file
-        - [ ] Solve the incomplete big file problem in ZhipuAI's API: 
-            - The file is only 100 line. It's not too big at all. Some functions and most classes have more code than that.
-            - [ ] 其实这个是截断问题。如果再输入“继续”则可以继续输出(需要引入历史)
+        - [x] Solve the incomplete big file problem in ZhipuAI's API: 
+            - The file is only 100 line. It's not too big at all. Some functions and most classes have more code than that. 这个问题在comment json文件的时候也遇到了，所以必须解决。
+            - [x] 其实这个是截断问题。如果再输入“继续”则可以继续输出(需要引入历史)
                 - 考虑：判断是否已输出所有行（粗略可以用行数来判断）。如果还没有输出完，则接着前面的历史，自己输出“继续”。
                 - 考虑：使用langchain拆分，可以试试sliding window等方式
     - [ ] Comment one section by one section using AST analyzed structure
