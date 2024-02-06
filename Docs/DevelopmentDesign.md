@@ -5,10 +5,11 @@
     - In this way, for every json, we can find its parent and grandparents till root. Thus, we might know more detail information regarding the code.
     - Use a TREE_JSON to alternate between tree and list modes
 - [ ] Use a public LLM to comment
-    - [ ] 考虑汇总信息、以及每个文件夹的分析(`xxx.py.analyze.md`)是否使用JSON格式(`xxx.py.analyze.json`)
+    - [x] 考虑汇总信息、以及每个文件夹的分析(`xxx.py.analyze.md`)是否使用JSON格式(`xxx.py.analyze.json`)
+        - ChatGLM4的json模式输出没有包含所有内容，放弃
     - [x] Use ZhipuAI LLM API
         - 对于2000行的超长类，GLM4已经忘了自己的注释的目标，没有写任何注释。这样来看，一个类并不适合直接放在一个对话框中分析。而且这种超长context也非常烧钱（特别是GLM是把input token跟output token一起算的）
-    - [ ] Comment the whole file
+    - [x] Comment the whole file
         - [x] Solve the incomplete big file problem in ZhipuAI's API: 
             - The file is only 100 line. It's not too big at all. Some functions and most classes have more code than that. 这个问题在comment json文件的时候也遇到了，所以必须解决。
             - [x] 其实这个是截断问题。如果再输入“继续”则可以继续输出(需要引入历史)

@@ -3,6 +3,7 @@ import json
 from dotenv import load_dotenv
 from llm_project_helper.parser.python_parser import python_analyze_code
 from loguru import logger
+from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyzer
 TREE_JSON = True
 
 class RepoTraverser:
@@ -56,4 +57,24 @@ class RepoTraverser:
 
                 except Exception as e:
                     logger.error(f"Error reading file {file_path}: {e}")
+        return cur_ws_dir
 
+    def analyze_repo(self, analyze_folder):
+        if not analyze_folder:
+            raise ValueError("Analyze folder not found")
+        
+        for root, dirs, files in os.walk(analyze_folder):
+            for file in files:
+                if not file.endswith(".json"):
+                    continue
+                file_path = os.path.join(root, file)
+                # save result in the folder as file_path, add only the suffix .analyze.md
+                analyze_file = file_path.replace('.json', '.analyze.md')
+                # if the file exists, skip the analyze and continue
+                if os.path.exists(analyze_file):
+                    continue
+                file_summary_analyzer = FileSummaryAnalyzer()
+                result = file_summary_analyzer.analyze_file_summary(file_path)
+                logger.info(result)
+                with open(analyze_file, 'w') as f:
+                    f.write(result)

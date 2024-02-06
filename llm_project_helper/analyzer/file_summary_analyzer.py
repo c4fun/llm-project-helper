@@ -13,7 +13,6 @@ class FileSummaryAnalyzer:
     def __init__(self):
         self.api = ZhipuAIAPI()
         self.prompt = PROMPT
-        self.meta_workspace = os.getenv("META_WORKSPACE")
 
     def analyze_file_summary(self, file_path):
         with open(file_path, 'r') as file:
