@@ -6,7 +6,7 @@
 
 2. 下载需要comment的仓库
 
-3. 添加`.env`文件，其中REPO_PATH是你下载下来的代码仓库
+3. 添加`.env`文件，其中REPO_PATH是你下载下来的代码仓库，请务必根据实际需要更改
 
 ```
 REPO_PATH="/your/repo/path/"
