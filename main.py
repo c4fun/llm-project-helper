@@ -22,8 +22,8 @@ if __name__ == '__main__':
     analyze_folder = traverser.traverse_repo(workspaces_dir)
     logger.info(f"Analyze folder: {analyze_folder}")
 
-    # # 2. Traverse and output the xxx.py.analyze.md file using LLM
-    # traverser.analyze_repo(analyze_folder)
+    # 2. Traverse and output the xxx.py.analyze.md file using LLM
+    traverser.analyze_repo(analyze_folder)
 
-    # # 3. Analyze code section by section and output to xxx.py.comments.json
-    # traverser.sectioned_comment(analyze_folder)
+    # 3. Analyze code section by section and output to xxx.py.comments.json
+    traverser.sectioned_comment(analyze_folder)

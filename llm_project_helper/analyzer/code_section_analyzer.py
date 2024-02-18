@@ -3,6 +3,7 @@ from loguru import logger
 from llm_project_helper.provider import ZhipuAIAPI
 from llm_project_helper.const import CODE_SECTION_PROMPT_JSON as PROMPT
 
+
 class CodeSectionAnalyzer:
     def __init__(self):
         self.api = ZhipuAIAPI()

@@ -8,6 +8,7 @@ from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyze
 from llm_project_helper.analyzer.code_section_analyzer import CodeSectionAnalyzer
 from llm_project_helper.const import TREE_JSON, FORCE_RE_ANALYZE, FORCE_RE_COMMENT
 
+
 class RepoTraverser:
     def __init__(self):
         load_dotenv()
@@ -45,7 +46,7 @@ class RepoTraverser:
 
                     # Output the result to a json file
                     output['relative_path'] = relative_path
-                    
+
                     json_file = relative_path.replace(os.sep, '--') + '.json'
 
                     if TREE_JSON:
@@ -76,7 +77,7 @@ class RepoTraverser:
     def analyze_repo(self, analyze_folder):
         if not analyze_folder:
             raise ValueError("Analyze folder not found")
-        
+
         for root, dirs, files in os.walk(analyze_folder):
             for file in files:
                 # include *.json but exclude *.comments.json
@@ -95,11 +96,10 @@ class RepoTraverser:
                 with open(analyze_file, 'w') as f:
                     f.write(result)
 
-                   
     def sectioned_comment(self, analyze_folder):
         if not analyze_folder:
             raise ValueError("Analyze folder not found")
-        
+
         for root, dirs, files in os.walk(analyze_folder):
             for file in files:
                 if not file.endswith(".json") or file.endswith(".comments.json"):

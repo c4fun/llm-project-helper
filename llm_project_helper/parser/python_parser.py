@@ -2,12 +2,13 @@ import ast
 import json
 import os
 
+
 class PythonParser(ast.NodeVisitor):
     def __init__(self):
         self.structure = {
             "imports": [],
-            "classes": {}, 
-            "functions": {}, 
+            "classes": {},
+            "functions": {},
             "global_variables": [],
             "main_block": []
         }
@@ -18,11 +19,13 @@ class PythonParser(ast.NodeVisitor):
 
     def visit_If(self, node):
         # Check if this is the main block
-        if (isinstance(node.test, ast.Compare) and 
-            isinstance(node.test.left, ast.Name) and 
-            node.test.left.id == "__name__" and 
-            isinstance(node.test.comparators[0], ast.Str) and 
-            node.test.comparators[0].s == "__main__"):
+        if (
+            isinstance(node.test, ast.Compare) and
+            isinstance(node.test.left, ast.Name) and
+            node.test.left.id == "__name__" and
+            isinstance(node.test.comparators[0], ast.Str) and
+            node.test.comparators[0].s == "__main__"
+        ):
             self.in_main_block = True
             for stmt in node.body:
                 self.visit(stmt)
@@ -60,7 +63,7 @@ class PythonParser(ast.NodeVisitor):
         docstring = ast.get_docstring(node)
         end_line_number = self.find_last_line(node)
         class_info = {
-            'methods': {}, 
+            'methods': {},
             'class_variables': [],
             'docstring': docstring,
             'line_number': node.lineno,
@@ -153,6 +156,7 @@ class PythonParser(ast.NodeVisitor):
     def extract_parameters(self, node):
         return [{'name': arg.arg, 'line_number': node.lineno} for arg in node.args.args]
 
+
 def analyze_code_from_file(file_path):
     with open(file_path, 'r') as file:
         code = file.read()
@@ -160,6 +164,7 @@ def analyze_code_from_file(file_path):
     analyzer = PythonParser()
     analyzer.visit(tree)
     return analyzer.structure
+
 
 def python_analyze_code(code):
     tree = ast.parse(code)

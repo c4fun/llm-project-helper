@@ -1,4 +1,3 @@
-import contextvars
 import os
 from pathlib import Path
 
@@ -14,6 +13,7 @@ TREE_JSON = True
 FORCE_RE_ANALYZE = False
 FORCE_RE_COMMENT = False
 
+
 def get_llm_project_helper_package_root():
     """Get the root directory of the installed package."""
     package_root = Path(llm_project_helper.__file__).parent.parent
@@ -25,7 +25,6 @@ def get_llm_project_helper_package_root():
 
     logger.info(f"Package root set to {str(package_root)}")
     return package_root
-
 
 
 def get_llm_project_helper_root():
@@ -43,6 +42,7 @@ def get_llm_project_helper_root():
         project_root = get_llm_project_helper_package_root()
     return project_root
 
+
 HOME_FOLDER_WORKSPACE_FLAG = True
 if os.getenv("HOME_FOLDER_WORKSPACE_FLAG") == "False":
     HOME_FOLDER_WORKSPACE_FLAG = False
@@ -52,7 +52,7 @@ if os.getenv("HOME_FOLDER_WORKSPACE_FLAG") == "False":
 LLM_PROJECT_HELPER_ROOT = get_llm_project_helper_root()  # Dependent on LLM_PROJECT_HELPER_PROJECT_ROOT
 
 # the workspace directory, used to store the code analysis result, add using os.sep
-WORKSPACE_DIR =  os.path.join(LLM_PROJECT_HELPER_ROOT, "workspaces")
+WORKSPACE_DIR = os.path.join(LLM_PROJECT_HELPER_ROOT, "workspaces")
 
 # a list that list all available SaaS code repository such as github.com, gitlab.com, gitee.com
 AVAILABLE_SAAS = ["github.com", "gitlab.com", "gitee.com"]
