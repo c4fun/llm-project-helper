@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
+import os
 from datetime import datetime
 from functools import partial
 
@@ -16,7 +17,8 @@ def define_log_level(print_level="INFO", logfile_level="DEBUG"):
 
     _logger.remove()
     _logger.add(sys.stderr, level=print_level)
-    _logger.add(LLM_PROJECT_HELPER_ROOT / f"logs/{formatted_date}.txt", level=logfile_level)
+    log_file_path = os.path.join(LLM_PROJECT_HELPER_ROOT, f"logs/{formatted_date}.txt")
+    _logger.add(log_file_path, level=logfile_level)
     return _logger
 
 

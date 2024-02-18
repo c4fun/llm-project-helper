@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from llm_project_helper.logs import logger
 
+
 class ZhipuAIAPI:
     def __init__(self):
         # Load environment variables from .env file
@@ -18,10 +19,10 @@ class ZhipuAIAPI:
         """
         history_zhipuai_format = []
         for human, assistant in history:
-            history_zhipuai_format.append({"role": "user", "content": human })
-            history_zhipuai_format.append({"role": "assistant", "content":assistant})
+            history_zhipuai_format.append({"role": "user", "content": human})
+            history_zhipuai_format.append({"role": "assistant", "content": assistant})
         return history_zhipuai_format
-    
+
     def record_usage(self, response):
         """
         Record the usage of the response
@@ -40,7 +41,7 @@ class ZhipuAIAPI:
 
         response = self.client.chat.completions.create(
             model='glm-4',
-            messages= history,
+            messages=history,
             stream=False
         )
 
@@ -56,7 +57,7 @@ class ZhipuAIAPI:
 
         response = self.client.chat.completions.create(
             model='glm-4',
-            messages= history_zhipuai_format,
+            messages=history_zhipuai_format,
             stream=False
         )
 
@@ -72,7 +73,7 @@ class ZhipuAIAPI:
 
         response = self.client.chat.completions.create(
             model='glm-4',
-            messages= history_zhipuai_format,
+            messages=history_zhipuai_format,
             stream=True
         )
 

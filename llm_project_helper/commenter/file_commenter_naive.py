@@ -8,6 +8,7 @@ PROMPT = """
 
 """
 
+
 class FileCommenterNaive:
     def __init__(self):
         self.api = ZhipuAIAPI()
@@ -18,4 +19,3 @@ class FileCommenterNaive:
             code = file.read()
         self.prompt += code
         return self.api.predict(self.prompt)
-

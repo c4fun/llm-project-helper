@@ -9,6 +9,9 @@
 3. 添加`.env`文件，其中REPO_PATH是你下载下来的代码仓库，请务必根据实际需要更改
 
 ```
+# # 可选：自定义分析文件所在的文件夹
+# LLM_PROJECT_HELPER_PROJECT_ROOT="~/.llm-project-helper/"
+
 REPO_PATH="/your/repo/path/"
 ZHIPUAI_API_KEY="xxx.yyy"
 ```
