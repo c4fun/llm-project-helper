@@ -6,16 +6,14 @@ from llm_project_helper.parser.python_parser import python_analyze_code
 from loguru import logger
 from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyzer
 from llm_project_helper.analyzer.code_section_analyzer import CodeSectionAnalyzer
-TREE_JSON = True
-
-FORCE_RE_COMMENT = False
+from llm_project_helper.const import TREE_JSON, FORCE_RE_ANALYZE, FORCE_RE_COMMENT
 
 class RepoTraverser:
     def __init__(self):
         load_dotenv()
         self.repo_path = os.getenv("REPO_PATH")
 
-    def traverse_repo(self, workspaces_dir):
+    def get_cur_ws_dir(self, workspaces_dir):
         if not self.repo_path:
             raise ValueError("Repository path not configured in .env file")
 
@@ -28,6 +26,10 @@ class RepoTraverser:
         if not os.path.exists(cur_ws_dir):
             logger.debug(f'Creating workspaces_dir: {cur_ws_dir}')
             os.makedirs(cur_ws_dir)
+        return cur_ws_dir
+
+    def traverse_repo(self, workspaces_dir):
+        cur_ws_dir = self.get_cur_ws_dir(workspaces_dir)
 
         for root, dirs, files in os.walk(self.repo_path):
             for file in files:
@@ -84,8 +86,8 @@ class RepoTraverser:
                 # save result in the folder as file_path, add only the suffix .analyze.md
                 analyze_file = file_path.replace('.json', '.analyze.md')
                 # if the file exists, skip the analyze and continue
-                # TODO: if FORCE-RE-ANALYZE is on, then re-do the analysis
-                if os.path.exists(analyze_file):
+                # TODO: if FORCE_RE_ANALYZE is on, then re-do the analysis
+                if os.path.exists(analyze_file) and not FORCE_RE_ANALYZE:
                     continue
                 file_summary_analyzer = FileSummaryAnalyzer()
                 result = file_summary_analyzer.analyze_file_summary(file_path)
@@ -106,7 +108,7 @@ class RepoTraverser:
                 # save result in the folder as file_path, add only the suffix .comments.json
                 analyze_file = file_path.replace('.json', '.comments.json')
                 # if the file exists, skip the analyze and continue
-                # TODO: if FORCE-RE-COMMENT is on, then re-do the analysis
+                # TODO: if FORCE_RE_COMMENT is on, then re-do the analysis
                 if os.path.exists(analyze_file) and not FORCE_RE_COMMENT:
                     continue
                 # get relevant summary file: *.py.analyze.md

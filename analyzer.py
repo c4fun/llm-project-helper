@@ -3,7 +3,7 @@ from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyze
 
 from llm_project_helper.logs import logger
 
-if __name__=='__main__':
+if __name__ == '__main__':
     # Single GLM request
     # file_path = '~/code/github.com/c4fun/llm-project-helper/workspaces/MetaGPT/metagpt/provider/zhipuai_api.py.json'
     # file_path = '~/code/github.com/c4fun/llm-project-helper/workspaces/Rope/rope/VideoManager.py.json'

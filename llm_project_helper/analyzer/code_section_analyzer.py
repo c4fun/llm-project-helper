@@ -1,23 +1,7 @@
-import os
 import json
-from dotenv import load_dotenv
 from loguru import logger
 from llm_project_helper.provider import ZhipuAIAPI
 from llm_project_helper.const import CODE_SECTION_PROMPT_JSON as PROMPT
-
-# # comments should look like
-# {
-#   "file_path": "/specific/file/path/",
-#   "comments:": [{
-#     "line_no": 25,
-#     "identation": 4,
-#     "remark": "这个功能实现了......"
-#   },{
-#     "line_no": 30,
-#     "identation": 6,
-#     "remark": "这个功能实现了......"
-#   }]
-# }
 
 class CodeSectionAnalyzer:
     def __init__(self):
@@ -43,7 +27,7 @@ class CodeSectionAnalyzer:
                 lines = self.read_specific_lines(code_file_path, start_line, end_line)
                 code = "\n".join(lines)
                 logger.debug(f"Code is: \n{code}")
-                
+
                 # 4. Add prompt to get the result
                 prompt = self.prompt + "\n" + "```\n" + code + "\n```"
                 logger.debug(f"Prompt is: \n{prompt}")
@@ -55,7 +39,6 @@ class CodeSectionAnalyzer:
                 # 6. add remarks and line numbers to the comments
                 comments.append({"line_no": start_line, "remark": remark})
 
-        
         if 'classes' in data:
             for class_name, class_details in data['classes'].items():
                 logger.info(f"Class: {class_name}")
@@ -67,7 +50,7 @@ class CodeSectionAnalyzer:
                         lines = self.read_specific_lines(code_file_path, start_line, end_line)
                         code = "\n".join(lines)
                         logger.debug(f"Code is: \n{code}")
-                        
+
                         # 4. Add prompt to get the result
                         prompt = self.prompt + "\n" + "```\n" + class_pesudo_code + code + "\n```"
                         logger.debug(f"Prompt is: \n{prompt}")
@@ -81,7 +64,6 @@ class CodeSectionAnalyzer:
 
         # 7. Return the comments
         return comments
-                        
 
     def read_specific_lines(self, filename, start_line, end_line):
         """
@@ -113,7 +95,6 @@ class CodeSectionAnalyzer:
 
         return lines
 
-
     def process_functions(self, functions):
         res = []
         for func_name, details in functions.items():
@@ -122,4 +103,3 @@ class CodeSectionAnalyzer:
             # contstruct a line_no, end_line_no pair
             res.append((line_number, end_line_number))
         return res
-        

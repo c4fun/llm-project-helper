@@ -6,6 +6,14 @@ from loguru import logger
 
 import llm_project_helper
 
+from dotenv import load_dotenv
+load_dotenv()
+
+# llm_project_helper/repo_traverser.py
+TREE_JSON = True
+FORCE_RE_ANALYZE = False
+FORCE_RE_COMMENT = False
+
 def get_llm_project_helper_package_root():
     """Get the root directory of the installed package."""
     package_root = Path(llm_project_helper.__file__).parent.parent
@@ -25,17 +33,32 @@ def get_llm_project_helper_root():
     # Check if a project root is specified in the environment variable
     project_root_env = os.getenv("LLM_PROJECT_HELPER_PROJECT_ROOT")
     if project_root_env:
-        project_root = Path(project_root_env)
+        project_root = os.path.expanduser(project_root_env)
         logger.info(f"PROJECT_ROOT set from environment variable to {str(project_root)}")
+    elif HOME_FOLDER_WORKSPACE_FLAG:
+        print("HOME_FOLDER_WORKSPACE_FLAG is True")
+        project_root = os.path.expanduser("~/.llm-project-helper/")
     else:
         # Fallback to package root if no environment variable is set
         project_root = get_llm_project_helper_package_root()
     return project_root
 
+HOME_FOLDER_WORKSPACE_FLAG = True
+if os.getenv("HOME_FOLDER_WORKSPACE_FLAG") == "False":
+    HOME_FOLDER_WORKSPACE_FLAG = False
 
 # LLM_PROJECT_HELPER PROJECT ROOT AND VARS
 
 LLM_PROJECT_HELPER_ROOT = get_llm_project_helper_root()  # Dependent on LLM_PROJECT_HELPER_PROJECT_ROOT
+
+# the workspace directory, used to store the code analysis result, add using os.sep
+WORKSPACE_DIR =  os.path.join(LLM_PROJECT_HELPER_ROOT, "workspaces")
+
+# a list that list all available SaaS code repository such as github.com, gitlab.com, gitee.com
+AVAILABLE_SAAS = ["github.com", "gitlab.com", "gitee.com"]
+
+# Prompts
+
 STRUCTURE_ANALYZE_PROMPT = """
 给你一个用JSON表示的python文件的结构，这个JSON文件中，imports表示导入的包，classes表示类，functions表示函数，methods表示类的方法，docstrings表示原来的注释。
 另外line_number表示它们在文件中的行号。
