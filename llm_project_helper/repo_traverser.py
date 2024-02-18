@@ -1,10 +1,14 @@
 import os
 import json
+import shutil
 from dotenv import load_dotenv
 from llm_project_helper.parser.python_parser import python_analyze_code
 from loguru import logger
 from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyzer
+from llm_project_helper.analyzer.code_section_analyzer import CodeSectionAnalyzer
 TREE_JSON = True
+
+FORCE_RE_COMMENT = False
 
 class RepoTraverser:
     def __init__(self):
@@ -48,10 +52,18 @@ class RepoTraverser:
                         folder_path = relative_path.replace(py_path, '')
 
                         cur_file_path = os.path.join(cur_ws_dir, folder_path)
+                        src_file_path = os.path.join(self.repo_path, folder_path)
                         if not os.path.exists(cur_file_path):
                             logger.debug(f'Creating folder: {cur_file_path}')
                             os.makedirs(cur_file_path)
                         json_file = os.path.join(cur_file_path, py_path + '.json')
+
+                        # 目前是临时的直接拷贝，后续需要通过规则获取源文件，或者记录在json文件中
+                        # TODO: 在sectioned_comment通过规则获取源文件
+                        src_file = os.path.join(src_file_path, py_path)
+                        # copy the src_file to cur_file_path
+                        shutil.copy2(src_file, os.path.join(cur_file_path, py_path))
+
                     with open(os.path.join(cur_ws_dir, json_file), 'w') as f:
                         json.dump(output, f, indent=4)
 
@@ -65,12 +77,14 @@ class RepoTraverser:
         
         for root, dirs, files in os.walk(analyze_folder):
             for file in files:
-                if not file.endswith(".json"):
+                # include *.json but exclude *.comments.json
+                if not file.endswith(".json") or file.endswith(".comments.json"):
                     continue
                 file_path = os.path.join(root, file)
                 # save result in the folder as file_path, add only the suffix .analyze.md
                 analyze_file = file_path.replace('.json', '.analyze.md')
                 # if the file exists, skip the analyze and continue
+                # TODO: if FORCE-RE-ANALYZE is on, then re-do the analysis
                 if os.path.exists(analyze_file):
                     continue
                 file_summary_analyzer = FileSummaryAnalyzer()
@@ -78,3 +92,34 @@ class RepoTraverser:
                 logger.info(result)
                 with open(analyze_file, 'w') as f:
                     f.write(result)
+
+                   
+    def sectioned_comment(self, analyze_folder):
+        if not analyze_folder:
+            raise ValueError("Analyze folder not found")
+        
+        for root, dirs, files in os.walk(analyze_folder):
+            for file in files:
+                if not file.endswith(".json") or file.endswith(".comments.json"):
+                    continue
+                file_path = os.path.join(root, file)
+                # save result in the folder as file_path, add only the suffix .comments.json
+                analyze_file = file_path.replace('.json', '.comments.json')
+                # if the file exists, skip the analyze and continue
+                # TODO: if FORCE-RE-COMMENT is on, then re-do the analysis
+                if os.path.exists(analyze_file) and not FORCE_RE_COMMENT:
+                    continue
+                # get relevant summary file: *.py.analyze.md
+                summary_file = file_path.replace('.json', '.analyze.md')
+                # get relevant code file:
+                code_file = file_path.replace('.json', '')
+
+                code_section_analyzer = CodeSectionAnalyzer()
+                comments = code_section_analyzer.analyze_code_section(file_path, summary_file, code_file)
+                logger.info(f"Comments of file {code_file} is:\n {comments}")
+                result = {
+                    "file_path": code_file,
+                    "comments": comments
+                }
+                with open(analyze_file, 'w', encoding='utf-8') as f:
+                    json.dump(result, f, indent=4, ensure_ascii=False)

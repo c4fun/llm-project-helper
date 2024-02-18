@@ -15,8 +15,12 @@
             - [x] 其实这个是截断问题。如果再输入“继续”则可以继续输出(需要引入历史)
                 - 考虑：判断是否已输出所有行（粗略可以用行数来判断）。如果还没有输出完，则接着前面的历史，自己输出“继续”。
                 - 考虑：使用langchain拆分，可以试试sliding window等方式
-    - [ ] Comment one section by one section using AST analyzed structure
+    - [x] Comment one section by one section using AST analyzed structure
+        - [ ] 有时候会逐行分析，可能需要在提示词中One-shot
+        - [ ] 应该能够切换颗粒度，一种是只在方法/函数上面注释，一种是逐行注释。默认是第一种。第二种需要注意输出可能不够大，需要手动继续。
+        - [ ] 需要在类上面加上注释
 - [x] Write prompt to comment
+- [x] Write comments in a json
 - [ ] Write comments back into the file
     - [ ] Write-back should occur backward
 - [ ] Use a private LLM through ollama to comment

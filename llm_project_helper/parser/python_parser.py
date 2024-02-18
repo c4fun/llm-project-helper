@@ -58,12 +58,17 @@ class PythonParser(ast.NodeVisitor):
     def visit_ClassDef(self, node):
         self.current_class = node.name
         docstring = ast.get_docstring(node)
-        self.structure["classes"][node.name] = {
+        end_line_number = self.find_last_line(node)
+        class_info = {
             'methods': {}, 
             'class_variables': [],
             'docstring': docstring,
-            'line_number': node.lineno
+            'line_number': node.lineno,
+            'end_line_number': end_line_number
         }
+        if node.decorator_list:
+            class_info['decorator_line_number'] = node.decorator_list[0].lineno
+        self.structure["classes"][node.name] = class_info
         self.generic_visit(node)
         self.current_class = None
 
@@ -87,31 +92,53 @@ class PythonParser(ast.NodeVisitor):
         self.generic_visit(node)
 
     def handle_function(self, node, is_async=False):
-        function_name = node.name
         docstring = ast.get_docstring(node)
+        end_line_number = self.find_last_line(node)
+
+        function_name = node.name
         method_variables = self.extract_variables(node)
         parameters = self.extract_parameters(node)
-        func_type = 'async_method' if is_async else 'method'
+
         if self.current_class is not None:
             self.current_method = function_name
-            self.structure["classes"][self.current_class]['methods'][function_name] = {
+            func_info = {
                 'method_variables': method_variables,
                 'parameters': parameters,
                 'docstring': docstring,
                 'line_number': node.lineno,
-                'type': func_type
+                'end_line_number': end_line_number,
+                'type': 'async_method' if is_async else 'method'
             }
+            if node.decorator_list:
+                func_info['decorator_line_number'] = node.decorator_list[0].lineno
+            self.structure["classes"][self.current_class]['methods'][function_name] = func_info
         else:
             self.current_function = function_name
-            self.structure["functions"][function_name] = {
+            func_info = {
                 'function_variables': method_variables,
                 'parameters': parameters,
                 'docstring': docstring,
                 'line_number': node.lineno,
+                'end_line_number': end_line_number,
                 'type': 'async_function' if is_async else 'function'
             }
+            if node.decorator_list:
+                func_info['decorator_line_number'] = node.decorator_list[0].lineno
+            self.structure["functions"][function_name] = func_info
         self.current_method = None
         self.current_function = None
+
+    def find_last_line(self, node):
+        """
+        Recursively find the last line of a node.
+        """
+        last_line = node.lineno
+        for child in ast.iter_child_nodes(node):
+            child_last_line = getattr(child, 'end_lineno', getattr(child, 'lineno', last_line))
+            if hasattr(child, 'body'):
+                child_last_line = max(child_last_line, self.find_last_line(child))
+            last_line = max(last_line, child_last_line)
+        return last_line
 
     def extract_variables(self, node):
         variables = []
