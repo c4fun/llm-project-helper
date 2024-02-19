@@ -12,6 +12,7 @@
 # # 可选：自定义分析文件所在的文件夹
 # LLM_PROJECT_HELPER_PROJECT_ROOT="~/.llm-project-helper/"
 
+LOCAL_REPO_FOLDER="/home/yourname/code"
 REPO_PATH="/your/repo/path/"
 ZHIPUAI_API_KEY="xxx.yyy"
 ```

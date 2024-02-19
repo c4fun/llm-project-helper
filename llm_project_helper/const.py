@@ -55,7 +55,7 @@ LLM_PROJECT_HELPER_ROOT = get_llm_project_helper_root()  # Dependent on LLM_PROJ
 WORKSPACE_DIR = os.path.join(LLM_PROJECT_HELPER_ROOT, "workspaces")
 
 # a list that list all available SaaS code repository such as github.com, gitlab.com, gitee.com
-AVAILABLE_SAAS = ["github.com", "gitlab.com", "gitee.com"]
+AVAILABLE_SAAS = ["github.com", "gitee.com", "gitlab.com", "jihulab.com"]
 
 # Prompts
 
