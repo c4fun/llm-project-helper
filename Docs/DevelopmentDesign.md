@@ -4,7 +4,7 @@
 - [x] Output the structured json data using directory?
     - In this way, for every json, we can find its parent and grandparents till root. Thus, we might know more detail information regarding the code.
     - Use a TREE_JSON to alternate between tree and list modes
-- [ ] Use a public LLM to comment
+- [x] Use a public LLM to comment
     - [x] 考虑汇总信息、以及每个文件夹的分析(`xxx.py.analyze.md`)是否使用JSON格式(`xxx.py.analyze.json`)
         - ChatGLM4的json模式输出没有包含所有内容，放弃
     - [x] Use ZhipuAI LLM API
@@ -23,6 +23,7 @@
 - [x] Write comments in a json
 - [ ] 加上对于 Java, JavaScript, TypeScript, Go, C, C++ 等语言的解析
     - [ ] 考虑使用tree-sitter： https://github.com/tree-sitter/tree-sitter
+    - [ ] 调研增量代码问题
 - [ ] 更新base LLM
     - [ ] 找一个不计算输入token，只计算输出token的LLM
         - [ ] Adjust prompt accordingly.

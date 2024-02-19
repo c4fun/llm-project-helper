@@ -76,8 +76,8 @@ class RepoTraverser:
                             os.makedirs(cur_file_path)
                         json_file = os.path.join(cur_file_path, py_path + '.json')
 
-                        # # 目前是临时的直接拷贝，后续需要通过规则获取源文件，或者记录在json文件中
-                        # # TODO: 在sectioned_comment通过规则获取源文件
+                        # # 之前是临时的直接拷贝，后续需要通过规则获取源文件，或者记录在json文件中
+                        # # DONE: 在sectioned_comment通过规则获取源文件
                         # src_file = os.path.join(src_file_path, py_path)
                         # # copy the src_file to cur_file_path
                         # shutil.copy2(src_file, os.path.join(cur_file_path, py_path))
@@ -102,7 +102,7 @@ class RepoTraverser:
                 # save result in the folder as file_path, add only the suffix .analyze.md
                 analyze_file = file_path.replace('.json', '.analyze.md')
                 # if the file exists, skip the analyze and continue
-                # TODO: if FORCE_RE_ANALYZE is on, then re-do the analysis
+                # DONE: if FORCE_RE_ANALYZE is on, then re-do the analysis
                 if os.path.exists(analyze_file) and not FORCE_RE_ANALYZE:
                     continue
                 file_summary_analyzer = FileSummaryAnalyzer()
@@ -123,7 +123,7 @@ class RepoTraverser:
                 # save result in the folder as file_path, add only the suffix .comments.json
                 analyze_file = file_path.replace('.json', '.comments.json')
                 # if the file exists, skip the analyze and continue
-                # TODO: if FORCE_RE_COMMENT is on, then re-do the analysis
+                # DONE: if FORCE_RE_COMMENT is on, then re-do the analysis
                 if os.path.exists(analyze_file) and not FORCE_RE_COMMENT:
                     continue
                 # get relevant summary file: *.py.analyze.md
@@ -141,7 +141,7 @@ class RepoTraverser:
                 comments = code_section_analyzer.analyze_code_section(file_path, summary_file, code_file)
                 logger.info(f"Comments of file {code_file} is:\n {comments}")
                 result = {
-                    "file_path": code_file,  # TODO: 这里的code_file需要使用SaaS地址+群组+项目+文件名方式
+                    "file_path": code_file,  # DONE: 这里的code_file需要使用SaaS地址+群组+项目+文件名方式
                     "comments": comments
                 }
                 with open(analyze_file, 'w', encoding='utf-8') as f:
