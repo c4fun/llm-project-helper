@@ -1,6 +1,5 @@
 import os
 import json
-import shutil
 from dotenv import load_dotenv
 from llm_project_helper.parser.python_parser import python_analyze_code
 from loguru import logger
@@ -34,7 +33,7 @@ class RepoTraverser:
                 repo_name = self.repo_path.split(saas)[-1]
                 repo_name = saas + repo_name
                 break
-        
+
         logger.info(f"repo_name from get_cur_ws_dir: {repo_name}")
 
         cur_ws_dir = os.path.join(workspaces_dir, repo_name)

@@ -1,5 +1,3 @@
-import os
-
 from llm_project_helper import RepoTraverser
 from llm_project_helper.logs import logger
 
