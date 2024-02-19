@@ -23,8 +23,11 @@
 - [x] Write comments in a json
 - [ ] 加上对于 Java, JavaScript, TypeScript, Go, C, C++ 等语言的解析
     - [ ] 考虑使用tree-sitter： https://github.com/tree-sitter/tree-sitter
-    - [ ] 调研增量代码问题
-- [ ] 更新base LLM
+- [ ] Epic: 调研增量代码问题
+    - [ ] 增量代码考虑 tree-sitter 的能力
+    - [ ] 增量代码的元数据和 git commit 的关系对应
+    - [ ] 增量代码的元数据在尽量少的元数据情况下更新
+- [ ] 更新 base LLM
     - [ ] 找一个不计算输入token，只计算输出token的LLM
         - [ ] Adjust prompt accordingly.
     - [ ] Use a private LLM through ollama to comment
