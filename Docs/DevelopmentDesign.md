@@ -21,6 +21,13 @@
         - [ ] 需要在类上面加上注释
 - [x] Write prompt to comment
 - [x] Write comments in a json
-- [ ] Write comments back into the file
+- [ ] 加上对于 Java, JavaScript, TypeScript, Go, C, C++ 等语言的解析
+    - [ ] 考虑使用tree-sitter： https://github.com/tree-sitter/tree-sitter
+- [ ] 更新base LLM
+    - [ ] 找一个不计算输入token，只计算输出token的LLM
+        - [ ] Adjust prompt accordingly.
+    - [ ] Use a private LLM through ollama to comment
+        - [ ] Adjust prompt accordingly.
+- [ ] Write comments back into the file? (暂时先不考虑，因为这个是侵入性的，而且不可以复用)
     - [ ] Write-back should occur backward
-- [ ] Use a private LLM through ollama to comment
+
