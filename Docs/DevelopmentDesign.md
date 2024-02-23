@@ -17,7 +17,7 @@
                 - 考虑：使用langchain拆分，可以试试sliding window等方式
     - [x] Comment one section by one section using AST analyzed structure
         - [ ] 有时候会逐行分析，可能需要在提示词中One-shot
-        - [ ] 应该能够切换颗粒度，一种是只在方法/函数上面注释，一种是逐行注释。默认是第一种。第二种需要注意输出可能不够大，需要手动继续。
+        - [ ] 应该能够切换颗粒度，一种是只在方法/函数上面注释，一种是逐行注释。默认是第一种。第二种需要注意输出可能不够大，需要手动继续。【直接用CodeGeex的 Auto Comment 即可，不必使用我这里的方法】
         - [ ] 需要在类上面加上注释
 - [x] Write prompt to comment
 - [x] Write comments in a json
