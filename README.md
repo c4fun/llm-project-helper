@@ -13,7 +13,7 @@ More Clarity. All-in-one Analysis.
 - [ ] TODO
 
 ## Languages
-- [ ] Python
+- [x] Python
 - [ ] JavaScript
 - [ ] TypeScript
 - [ ] Java
