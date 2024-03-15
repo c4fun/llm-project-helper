@@ -1,3 +1,5 @@
+import argparse
+import sys
 from llm_project_helper import RepoTraverser
 from llm_project_helper.logs import logger
 
@@ -6,7 +8,21 @@ load_dotenv()
 
 
 if __name__ == '__main__':
-    traverser = RepoTraverser()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--repo-path", 
+        type=str,
+        help="The code repo path to analyze"
+    )
+    
+    args = parser.parse_args()
+    repo_path = args.repo_path
+    print(f"Repo path: {repo_path}")
+    # if the args does not have a repo_path, provide one
+    if not repo_path:
+        sys.exit("Please provide a repo file path. Exiting")
+
+    traverser = RepoTraverser(repo_path)
 
     # # concat current folder with workspaces; if env defined a home folder, then use that
     # workspaces_dir = os.path.join(os.getcwd(), WORKSPACE_DIR)

@@ -11,8 +11,9 @@ load_dotenv()
 
 
 class RepoTraverser:
-    def __init__(self):
-        self.repo_path = os.getenv("REPO_PATH")
+    def __init__(self, repo_path):
+        self.repo_path = repo_path
+        # self.repo_path = os.getenv("REPO_PATH")
 
     def get_cur_ws_dir(self):
         if not self.repo_path:
