@@ -20,7 +20,7 @@ if __name__ == '__main__':
     print(f"Repo path: {repo_path}")
     # if the args does not have a repo_path, provide one
     if not repo_path:
-        sys.exit("Please provide a repo file path. Exiting")
+        sys.exit("Please provide a repo path in --repo-path. Exiting")
 
     traverser = RepoTraverser(repo_path)
 
