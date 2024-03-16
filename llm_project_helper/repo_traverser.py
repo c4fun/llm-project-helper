@@ -2,7 +2,7 @@ import os
 import json
 from dotenv import load_dotenv
 from llm_project_helper.parser.python_parser import python_analyze_code
-from loguru import logger
+from llm_project_helper.logs import logger
 from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyzer
 from llm_project_helper.analyzer.code_section_analyzer import CodeSectionAnalyzer
 from llm_project_helper.const import TREE_JSON, FORCE_RE_ANALYZE, FORCE_RE_COMMENT, AVAILABLE_SAAS, WORKSPACE_DIR
@@ -11,8 +11,8 @@ load_dotenv()
 
 
 class RepoTraverser:
-    def __init__(self):
-        self.repo_path = os.getenv("REPO_PATH")
+    def __init__(self, repo_path):
+        self.repo_path = repo_path
 
     def get_cur_ws_dir(self):
         if not self.repo_path:
@@ -88,7 +88,7 @@ class RepoTraverser:
                     logger.error(f"Error reading file {file_path}: {e}")
         return cur_ws_dir
 
-    def analyze_repo(self, analyze_folder):
+    def analyze_repo(self, analyze_folder, force_re_anlayze):
         if not analyze_folder:
             raise ValueError("Analyze folder not found")
 
@@ -102,7 +102,7 @@ class RepoTraverser:
                 analyze_file = file_path.replace('.json', '.analyze.md')
                 # if the file exists, skip the analyze and continue
                 # DONE: if FORCE_RE_ANALYZE is on, then re-do the analysis
-                if os.path.exists(analyze_file) and not FORCE_RE_ANALYZE:
+                if os.path.exists(analyze_file) and not FORCE_RE_ANALYZE and not force_re_anlayze:
                     continue
                 file_summary_analyzer = FileSummaryAnalyzer()
                 result = file_summary_analyzer.analyze_file_summary(file_path)
@@ -110,7 +110,7 @@ class RepoTraverser:
                 with open(analyze_file, 'w') as f:
                     f.write(result)
 
-    def sectioned_comment(self, analyze_folder):
+    def sectioned_comment(self, analyze_folder, force_re_comment):
         if not analyze_folder:
             raise ValueError("Analyze folder not found")
 
@@ -123,7 +123,7 @@ class RepoTraverser:
                 analyze_file = file_path.replace('.json', '.comments.json')
                 # if the file exists, skip the analyze and continue
                 # DONE: if FORCE_RE_COMMENT is on, then re-do the analysis
-                if os.path.exists(analyze_file) and not FORCE_RE_COMMENT:
+                if os.path.exists(analyze_file) and not FORCE_RE_COMMENT and not force_re_comment:
                     continue
                 # get relevant summary file: *.py.analyze.md
                 summary_file = file_path.replace('.json', '.analyze.md')
