@@ -13,6 +13,11 @@ TREE_JSON = True
 FORCE_RE_ANALYZE = False
 FORCE_RE_COMMENT = False
 
+from enum import Enum
+
+class Language(Enum):
+    PYTHON = "python"
+    UNKNOWN = "unknown"
 
 def get_llm_project_helper_package_root():
     """Get the root directory of the installed package."""

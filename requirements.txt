@@ -1,3 +1,5 @@
 python-dotenv
 loguru==0.7.2
 zhipuai==2.0.1
+tree-sitter==0.21.0
+tree_sitter_languages==1.10.2

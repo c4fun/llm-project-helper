@@ -44,6 +44,12 @@ class RepoTraverser:
         return cur_ws_dir
 
     def traverse_repo(self):
+        """
+        Traverse the whole repository and analyze the code structure of each file.
+
+        :return: traverse the whole repo and analyze their code structure and get result
+        """
+        
         cur_ws_dir = self.get_cur_ws_dir()
 
         for root, dirs, files in os.walk(self.repo_path):
