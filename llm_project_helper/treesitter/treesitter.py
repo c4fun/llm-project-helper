@@ -5,102 +5,81 @@ from tree_sitter_languages import get_language, get_parser
 
 from llm_project_helper.const import Language
 from llm_project_helper.treesitter.treesitter_registry import TreesitterRegistry
+from pydantic import BaseModel, Field
+from llm_project_helper.logs import logger
 
+# class CustomBaseModel(BaseModel):
+#     class Config:
+#         arbitrary_types_allowed = True
+#         json_encoders = {
+#             tree_sitter.Node: lambda v: str(v)  # or any other serialization you prefer
+#         }
 
-class TreesitterMethodNode:
-    def __init__(
-        self,
-        name: "str | bytes | None",
-        doc_comment: "str | None",
-        node: tree_sitter.Node,
-        source_code: "str | None",
-        method_variables: "list[str] | None",
-        parameters: "list[str] | None",
-        line_number: int,
-        end_line_number: int,
-        async_method_flag: bool,
-        decorator_line_number: int,
-    ):
-        self.name = name
-        self.doc_comment = doc_comment
-        self.node = node
-        self.source_code = source_code or (node.text.decode() if node else None)
-        self.method_variables = method_variables
-        self.parameters = parameters
-        self.line_number = line_number
-        self.end_line_number = end_line_number
-        self.async_method_flag = async_method_flag
-        self.decorator_line_number = decorator_line_number
+#     def model_dump(self, **kwargs):
+#         exclude = kwargs.pop('exclude', set())
+#         exclude.update({'node', 'source_code'})  # Automatically exclude these fields
+#         return super().model_dump(**kwargs, exclude=exclude)
 
-class TreesitterClassNode:
-    def __init__(
-        self,
-        name: "str | bytes | None",
-        methods: "dict[str, TreesitterMethodNode] | None",
-        class_variables: "list[str] | None",
-        doc_comment: "str | None",
-        line_number: int,
-        end_line_number: int,
-        node: tree_sitter.Node,
-        source_code: "str | None",
-    ):
-        self.name = name
-        self.methods = methods  # This will be a dict {method_name: TreesitterMethodNode}
-        self.class_variables = class_variables
-        self.doc_comment = doc_comment
-        self.line_number = line_number
-        self.end_line_number = end_line_number
-        self.node = node
-        self.source_code = source_code or (node.text.decode() if node else None)
+class TreesitterMethodVariableNode(BaseModel):
+    name: str | bytes | None
+    line_number: int
+    class Config:
+        arbitrary_types_allowed = True
 
-class TreesitterImportNode:
-    def __init__(
-        self,
-        import_identifier: str,
-        line_number: int,
-        from_module: "str | None",
-        node: tree_sitter.Node,
-        source_code: "str | None",
-    ):
-        self.import_identifier = import_identifier
-        self.line_number = line_number
-        self.from_module = from_module
-        self.node = node
-        self.source_code = source_code or node.text.decode()
+class TreesitterMethodNode(BaseModel):
+    name: str | bytes | None
+    doc_comment: str | None
+    node: tree_sitter.Node = Field(..., exclude=True)
+    source_code: str | None = Field(exclude=True)
+    method_variables: list[TreesitterMethodVariableNode] | None
+    parameters: list[str] | None
+    line_number: int
+    end_line_number: int
+    async_method_flag: bool
+    decorator_line_number: int | None
+    class Config:
+        arbitrary_types_allowed = True
 
-class TreesitterGlobalVariableNode:
-    def __init__(
-        self,
-        name: "str | bytes | None",
-        line_number: int
-    ):
-        self.name = name
-        self.line_number = line_number
+class TreesitterClassNode(BaseModel):
+    name: str | bytes | None
+    methods: dict[str, TreesitterMethodNode] | None
+    class_variables: list[str] | None
+    doc_comment: str | None
+    line_number: int
+    end_line_number: int
+    node: tree_sitter.Node = Field(..., exclude=True)
+    source_code: str | None = Field(exclude=True)
+    class Config:
+        arbitrary_types_allowed = True
 
+class TreesitterImportNode(BaseModel):
+    import_identifier: str | None
+    line_number: int
+    from_module: str | None
+    node: tree_sitter.Node = Field(..., exclude=True)
+    source_code: str | None = Field(exclude=True)
+    class Config:
+        arbitrary_types_allowed = True
 
-class TreesitterMainBlockNode:
-    def __init__(
-        self,
-        node: tree_sitter.Node,
-        source_code: "str | None",
-    ):
-        self.node = node
-        self.source_code = source_code or node.text.decode()
+class TreesitterGlobalVariableNode(BaseModel):
+    name: str | bytes | None
+    line_number: int
+    class Config:
+        arbitrary_types_allowed = True
 
-class TreesitterResultNode:
-    def __init__(
-        self,
-        imports: list[TreesitterImportNode],
-        classes: dict[str, dict],
-        functions: dict[str, TreesitterMethodNode],
-        global_variables: list[TreesitterGlobalVariableNode],
-        main_block: TreesitterMainBlockNode,
-    ):
-        self.imports = imports
-        self.classes = classes
-        self.functions = functions
-        self.global_variables = global_variables
-        self.main_block = main_block
+class TreesitterMainBlockNode(BaseModel):
+    node: tree_sitter.Node = Field(..., exclude=True)
+    source_code: str | None
+    class Config:
+        arbitrary_types_allowed = True
+class TreesitterResultNode(BaseModel):
+    imports: list[TreesitterImportNode] | None
+    classes: dict[str, TreesitterClassNode] | None
+    functions: dict[str, TreesitterMethodNode] | None
+    global_variables: list[TreesitterGlobalVariableNode] | None
+    main_block: TreesitterMainBlockNode | None
+    class Config:
+        arbitrary_types_allowed = True
 
 class Treesitter(ABC):
     def __init__(
@@ -124,18 +103,30 @@ class Treesitter(ABC):
 
     def parse(self, file_bytes: bytes) -> list[TreesitterMethodNode]:
         self.tree = self.parser.parse(file_bytes)
+        
+        imports=self._query_imports(self.tree.root_node)
+        logger.debug(f'typeof imports: {type(imports)}')
+        classes=self._query_classes(self.tree.root_node)
+        logger.debug(f'typeof classes: {type(classes)}')
+        functions=self._query_functions(self.tree.root_node)
+        logger.debug(f'typeof functions: {type(functions)}')
+        global_variables=self._query_global_variables(self.tree.root_node)
+        logger.debug(f'typeof global_variables: {type(global_variables)}')
+        main_block=self._query_main_block(self.tree.root_node)
+        logger.debug(f'typeof main_block: {type(main_block)}')
+
         all_result = TreesitterResultNode(
-            imports=self._query_imports(self.tree.root_node),
-            classes=self._query_classes(self.tree.root_node),
-            functions=self._query_functions(self.tree.root_node),
-            global_variables=self._query_global_variables(self.tree.root_node),
-            main_block=self._query_main_block(self.tree.root_node),
+            imports=imports,
+            classes=classes,
+            functions=functions,
+            global_variables=global_variables,
+            main_block=main_block,
         )
-        print(f'all_result: {all_result}')
+        # logger.debug(f'all_result: {all_result}')
         return all_result
     
     def _query_functions(self, node: tree_sitter.Node) -> list:
-        result = []
+        result = {}
         query = self.language.query("""
             (function_definition
                 name: (identifier) @function_name
@@ -166,18 +157,18 @@ class Treesitter(ABC):
                     async_method_flag = self._check_async_method(captured_node)
                     decorator_line_number = self._extract_decorator_line_number(captured_node)
 
-                    result.append(TreesitterMethodNode(
-                        name,
-                        doc_comment,
-                        captured_node,
-                        None,  # Assuming source_code is not used or removed based on previous context
-                        method_variables,
-                        parameters,
-                        line_number,
-                        end_line_number,
-                        async_method_flag,
-                        decorator_line_number
-                    ))
+                    result[name] = TreesitterMethodNode(
+                        name=name,
+                        doc_comment=doc_comment,
+                        node=captured_node,
+                        source_code=captured_node.text.decode('utf-8'),
+                        method_variables=method_variables,
+                        parameters=parameters,
+                        line_number=line_number,
+                        end_line_number=end_line_number,
+                        async_method_flag=async_method_flag,
+                        decorator_line_number=decorator_line_number
+                    )
 
         return result
 
@@ -195,7 +186,10 @@ class Treesitter(ABC):
         captures = query.captures(node)
         for captured_node, _ in captures:
             variable_name = captured_node.child_by_field_name('left').text.decode('utf-8')
-            variables.append(variable_name)
+            # retrieve the line_number of the variable
+            line_number = captured_node.start_point[0] + 1
+            # append the variable_name and line_number to a dict
+            variables.append({'name': variable_name, 'line_number': line_number})
         return variables
 
     def _extract_parameters(self, node: tree_sitter.Node):
@@ -245,6 +239,7 @@ class Treesitter(ABC):
         imports = []
         query = self.language.query(f"(import_statement) @import")
         for captured_node, _ in query.captures(node):
+            logger.debug(f'captured_node.text.decode(): {captured_node.text.decode()}')
             imports.append(TreesitterImportNode(
                 import_identifier=captured_node.text.decode(),
                 line_number=captured_node.start_point[0]+1,
@@ -288,19 +283,19 @@ class Treesitter(ABC):
                 end_line_number = captured_node.end_point[0] + 1
 
                 classes[name] = TreesitterClassNode(
-                    name,
-                    methods,
-                    class_variables,
-                    doc_comment,
-                    line_number,
-                    end_line_number,
-                    captured_node,
-                    None
+                    name=name,
+                    methods=methods,
+                    class_variables=class_variables,
+                    doc_comment=doc_comment,
+                    line_number=line_number,
+                    end_line_number=end_line_number,
+                    node=captured_node,
+                    source_code=captured_node.text.decode('utf-8'),
                 )
         return classes
 
     def _query_methods_within_class(self, class_node: tree_sitter.Node):
-        result = []
+        result = {}
         query = self.language.query("""
             (function_definition
                 name: (identifier) @function_name
@@ -321,18 +316,18 @@ class Treesitter(ABC):
                 async_method_flag = self._check_async_method(captured_node)
                 decorator_line_number = self._extract_decorator_line_number(captured_node)
 
-                result.append(TreesitterMethodNode(
-                    name,
-                    doc_comment,
-                    captured_node,
-                    None,
-                    method_variables,
-                    parameters,
-                    line_number,
-                    end_line_number,
-                    async_method_flag,
-                    decorator_line_number
-                ))
+                result[name] = TreesitterMethodNode(
+                    name=name,
+                    doc_comment=doc_comment,
+                    node=captured_node,
+                    source_code=captured_node.text.decode('utf-8'),
+                    method_variables=method_variables,
+                    parameters=parameters,
+                    line_number=line_number,
+                    end_line_number=end_line_number,
+                    async_method_flag=async_method_flag,
+                    decorator_line_number=decorator_line_number
+                )
         return result
 
     def _extract_class_variables(self, class_node: tree_sitter.Node):
@@ -379,8 +374,8 @@ class Treesitter(ABC):
                 variable_name = captured_node.text.decode('utf-8')
                 line_number = captured_node.start_point[0] + 1
                 global_variables.append(TreesitterGlobalVariableNode(
-                    variable_name,
-                    line_number
+                    name=variable_name,
+                    line_number=line_number,
                 ))
 
         return global_variables

@@ -2,6 +2,7 @@ import os
 import json
 from dotenv import load_dotenv
 from llm_project_helper.parser.python_parser import python_analyze_code
+from llm_project_helper.parser.treesitter_parser import analyze_code_from_file
 from llm_project_helper.logs import logger
 from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyzer
 from llm_project_helper.analyzer.code_section_analyzer import CodeSectionAnalyzer
@@ -62,10 +63,12 @@ class RepoTraverser:
                 try:
                     with open(file_path, 'r', encoding='utf-8') as file_handler:
                         code = file_handler.read()
-                    output = python_analyze_code(code)
+                    # output = python_analyze_code(code)
+                    raw_output = analyze_code_from_file(file_path)
+                    result_dict = raw_output.model_dump()
 
                     # Output the result to a json file
-                    output['relative_path'] = relative_path
+                    result_dict['relative_path'] = relative_path
 
                     json_file = relative_path.replace(os.sep, '--') + '.json'
 
@@ -87,8 +90,9 @@ class RepoTraverser:
                         # # copy the src_file to cur_file_path
                         # shutil.copy2(src_file, os.path.join(cur_file_path, py_path))
 
+                    json_result = json.dumps(result_dict, indent=4, default=str)
                     with open(os.path.join(cur_ws_dir, json_file), 'w') as f:
-                        json.dump(output, f, indent=4)
+                        f.write(json_result)
 
                 except Exception as e:
                     logger.error(f"Error reading file {file_path}: {e}")
