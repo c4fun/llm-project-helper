@@ -73,7 +73,7 @@ class TreesitterResultNode:
         self,
         imports: list[TreesitterImportNode],
         classes: dict[str, dict],
-        functions: list[TreesitterMethodNode]
+        functions: dict[str, TreesitterMethodNode]
     ):
         self.imports = imports
         self.classes = classes
