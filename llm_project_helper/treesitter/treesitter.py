@@ -77,6 +77,16 @@ class TreesitterGlobalVariableNode:
         self.name = name
         self.line_number = line_number
 
+
+class TreesitterMainBlockNode:
+    def __init__(
+        self,
+        node: tree_sitter.Node,
+        source_code: "str | None",
+    ):
+        self.node = node
+        self.source_code = source_code or node.text.decode()
+
 class TreesitterResultNode:
     def __init__(
         self,
@@ -84,12 +94,13 @@ class TreesitterResultNode:
         classes: dict[str, dict],
         functions: dict[str, TreesitterMethodNode],
         global_variables: list[TreesitterGlobalVariableNode],
+        main_block: TreesitterMainBlockNode,
     ):
         self.imports = imports
         self.classes = classes
         self.functions = functions
         self.global_variables = global_variables
-
+        self.main_block = main_block
 
 class Treesitter(ABC):
     def __init__(
@@ -118,6 +129,7 @@ class Treesitter(ABC):
             classes=self._query_classes(self.tree.root_node),
             functions=self._query_functions(self.tree.root_node),
             global_variables=self._query_global_variables(self.tree.root_node),
+            main_block=self._query_main_block(self.tree.root_node),
         )
         print(f'all_result: {all_result}')
         return all_result
@@ -372,3 +384,38 @@ class Treesitter(ABC):
                 ))
 
         return global_variables
+    
+    def _query_main_block(self, node: tree_sitter.Node):
+        query_str = """
+            (module
+                (if_statement
+                    condition: (comparison_operator) @comparison
+                    consequence: (block) @block
+                ) @if_stmt
+            )
+        """
+        query = self.language.query(query_str)
+        captures = query.captures(node)
+
+        for captured_node, capture_name in captures:
+            if capture_name == 'comparison':
+                # Directly inspect children of the comparison_operator to find identifier and string
+                identifier_node = None
+                string_node = None
+                for child in captured_node.children:
+                    if child.type == 'identifier' and child.text.decode('utf-8') == '__name__':
+                        identifier_node = child
+                    elif child.type == 'string':
+                        string_content = child.text.decode('utf-8').strip('"\'')
+                        if string_content == '__main__':
+                            string_node = child
+
+                if identifier_node and string_node:
+                    # Proceed to extract the block associated with this if_statement
+                    block_node = next((n for n, n_name in captures if n_name == 'block' and n.parent == captured_node.parent), None)
+                    if block_node:
+                        line_number = block_node.start_point[0] + 1
+                        block_code = block_node.text.decode('utf-8')
+                        return TreesitterMainBlockNode(node=block_node, source_code=block_code)
+
+        return None

@@ -81,13 +81,18 @@ def analyze_code_from_file(file_name):
             print(f'Global variable: {global_variable.name}')
             print(f'Global variable line number: {global_variable.line_number}')
 
+        main_block = treesitter_result_nodes.main_block
+        print(f'Main block: {main_block}')
+        print(f'Main block source code: {main_block.source_code}')
+
 
 if __name__ == "__main__":
 
     # Example usage with a file path
-    # file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
+    file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
     # file_name = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'
-    file_name = '~/code/github.com/geekan/MetaGPT/setup.py'
+    # file_name = '~/code/github.com/geekan/MetaGPT/setup.py'
+    # file_name = '~/code/github.com/geekan/MetaGPT/tests/metagpt/tools/test_azure_tts.py'
     expanded_path = os.path.expanduser(file_name)
 
     result = analyze_code_from_file(expanded_path)
