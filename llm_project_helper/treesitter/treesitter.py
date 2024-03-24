@@ -68,16 +68,27 @@ class TreesitterImportNode:
         self.node = node
         self.source_code = source_code or node.text.decode()
 
+class TreesitterGlobalVariableNode:
+    def __init__(
+        self,
+        name: "str | bytes | None",
+        line_number: int
+    ):
+        self.name = name
+        self.line_number = line_number
+
 class TreesitterResultNode:
     def __init__(
         self,
         imports: list[TreesitterImportNode],
         classes: dict[str, dict],
-        functions: dict[str, TreesitterMethodNode]
+        functions: dict[str, TreesitterMethodNode],
+        global_variables: list[TreesitterGlobalVariableNode],
     ):
         self.imports = imports
         self.classes = classes
         self.functions = functions
+        self.global_variables = global_variables
 
 
 class Treesitter(ABC):
@@ -102,15 +113,11 @@ class Treesitter(ABC):
 
     def parse(self, file_bytes: bytes) -> list[TreesitterMethodNode]:
         self.tree = self.parser.parse(file_bytes)
-        # all_result = {
-        #     "imports": self._query_imports(self.tree.root_node),
-        #     "classes": self._query_classes(self.tree.root_node),
-        #     "functions": self._query_functions(self.tree.root_node),
-        # }
         all_result = TreesitterResultNode(
             imports=self._query_imports(self.tree.root_node),
             classes=self._query_classes(self.tree.root_node),
-            functions=self._query_functions(self.tree.root_node)
+            functions=self._query_functions(self.tree.root_node),
+            global_variables=self._query_global_variables(self.tree.root_node),
         )
         print(f'all_result: {all_result}')
         return all_result
@@ -339,3 +346,29 @@ class Treesitter(ABC):
                 class_variables.append(variable_name)
 
         return class_variables
+
+    def _query_global_variables(self, node: tree_sitter.Node):
+        global_variables = []
+        query_str = """
+            (module
+                (expression_statement
+                    (assignment
+                        left: (identifier) @variable_name
+                        right: _ @value
+                    )
+                )
+            )
+        """
+        query = self.language.query(query_str)
+        captures = query.captures(node)
+
+        for captured_node, capture_name in captures:
+            if capture_name == 'variable_name':
+                variable_name = captured_node.text.decode('utf-8')
+                line_number = captured_node.start_point[0] + 1
+                global_variables.append(TreesitterGlobalVariableNode(
+                    variable_name,
+                    line_number
+                ))
+
+        return global_variables

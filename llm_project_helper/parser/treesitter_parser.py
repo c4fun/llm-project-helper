@@ -3,7 +3,7 @@ sys.path.append('~/code/github.com/c4fun/llm-project-helper')
 import os
 import json
 from llm_project_helper import utils
-from llm_project_helper.treesitter import Treesitter, TreesitterMethodNode, TreesitterResultNode
+from llm_project_helper.treesitter import Treesitter, TreesitterMethodNode, TreesitterResultNode, TreesitterGlobalVariableNode
 
 
 def analyze_code_from_file(file_name):
@@ -76,13 +76,18 @@ def analyze_code_from_file(file_name):
 
             # print(f'Method async: {function.async_method_flag}')
 
+        global_variables = treesitter_result_nodes.global_variables
+        for global_variable in global_variables:
+            print(f'Global variable: {global_variable.name}')
+            print(f'Global variable line number: {global_variable.line_number}')
 
 
 if __name__ == "__main__":
 
     # Example usage with a file path
-    file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
+    # file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
     # file_name = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'
+    file_name = '~/code/github.com/geekan/MetaGPT/setup.py'
     expanded_path = os.path.expanduser(file_name)
 
     result = analyze_code_from_file(expanded_path)
