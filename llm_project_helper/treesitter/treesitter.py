@@ -36,8 +36,8 @@ class TreesitterClassNode:
     def __init__(
         self,
         name: "str | bytes | None",
-        methods: "dict[str, TreesitterMethodNode]",
-        class_variables: "list[str]",
+        methods: "dict[str, TreesitterMethodNode] | None",
+        class_variables: "list[str] | None",
         doc_comment: "str | None",
         line_number: int,
         end_line_number: int,
@@ -128,27 +128,38 @@ class Treesitter(ABC):
 
         for captured_node, _ in captures:
             if captured_node.type == 'function_definition':
-                name = self._query_method_name(captured_node)
-                doc_comment = self._extract_doc_comment(captured_node)
-                method_variables = self._extract_method_variables(captured_node)
-                parameters = self._extract_parameters(captured_node)
-                line_number = captured_node.start_point[0] + 1
-                end_line_number = captured_node.end_point[0] + 1
-                async_method_flag = self._check_async_method(captured_node)
-                decorator_line_number = self._extract_decorator_line_number(captured_node)
+                # Traverse up the tree to check if this function is within a class
+                is_within_class = False
+                ancestor = captured_node.parent
+                while ancestor:
+                    if ancestor.type == 'class_definition':
+                        is_within_class = True
+                        break
+                    ancestor = ancestor.parent
 
-                result.append(TreesitterMethodNode(
-                    name,
-                    doc_comment,
-                    captured_node,
-                    None,
-                    method_variables,
-                    parameters,
-                    line_number,
-                    end_line_number,
-                    async_method_flag,
-                    decorator_line_number
-                ))
+                if not is_within_class:
+                    name = self._query_method_name(captured_node)
+                    doc_comment = self._extract_doc_comment(captured_node)
+                    method_variables = self._extract_method_variables(captured_node)
+                    parameters = self._extract_parameters(captured_node)
+                    line_number = captured_node.start_point[0] + 1
+                    end_line_number = captured_node.end_point[0] + 1
+                    async_method_flag = self._check_async_method(captured_node)
+                    decorator_line_number = self._extract_decorator_line_number(captured_node)
+
+                    result.append(TreesitterMethodNode(
+                        name,
+                        doc_comment,
+                        captured_node,
+                        None,  # Assuming source_code is not used or removed based on previous context
+                        method_variables,
+                        parameters,
+                        line_number,
+                        end_line_number,
+                        async_method_flag,
+                        decorator_line_number
+                    ))
+
         return result
 
     def _extract_doc_comment(self, node: tree_sitter.Node):
@@ -250,9 +261,81 @@ class Treesitter(ABC):
             captured_node, _ = capture  # Unpack the tuple into the node and its capture index
             name_node = captured_node.child_by_field_name('name')  # Access 'name' field directly from the node
             if name_node:  # Ensure the name_node is not None
-                class_name = name_node.text.decode('utf-8')  # Decode the name_node's text
-                classes[class_name] = {
-                    # Initialization or processing related to the class
-                    # You may need to adjust this part based on your requirements
-                }
+                name = name_node.text.decode('utf-8')  # Decode the name_node's text
+                methods = self._query_methods_within_class(captured_node)
+                class_variables = self._extract_class_variables(captured_node)
+                doc_comment = self._extract_doc_comment(captured_node)
+                line_number = captured_node.start_point[0] + 1
+                end_line_number = captured_node.end_point[0] + 1
+
+                classes[name] = TreesitterClassNode(
+                    name,
+                    methods,
+                    class_variables,
+                    doc_comment,
+                    line_number,
+                    end_line_number,
+                    captured_node,
+                    None
+                )
         return classes
+
+    def _query_methods_within_class(self, class_node: tree_sitter.Node):
+        result = []
+        query = self.language.query("""
+            (function_definition
+                name: (identifier) @function_name
+                parameters: (parameters) @params
+                body: (block) @body
+            ) @function
+        """)
+        captures = query.captures(class_node)
+
+        for captured_node, _ in captures:
+            if captured_node.type == 'function_definition':
+                name = self._query_method_name(captured_node)
+                doc_comment = self._extract_doc_comment(captured_node)
+                method_variables = self._extract_method_variables(captured_node)
+                parameters = self._extract_parameters(captured_node)
+                line_number = captured_node.start_point[0] + 1
+                end_line_number = captured_node.end_point[0] + 1
+                async_method_flag = self._check_async_method(captured_node)
+                decorator_line_number = self._extract_decorator_line_number(captured_node)
+
+                result.append(TreesitterMethodNode(
+                    name,
+                    doc_comment,
+                    captured_node,
+                    None,
+                    method_variables,
+                    parameters,
+                    line_number,
+                    end_line_number,
+                    async_method_flag,
+                    decorator_line_number
+                ))
+        return result
+
+    def _extract_class_variables(self, class_node: tree_sitter.Node):
+        class_variables = []
+        query_str = """
+            (class_definition
+                body: (block
+                    (expression_statement
+                        (assignment
+                            left: (identifier) @variable_name
+                            right: _ @value
+                        )
+                    )
+                )
+            )
+        """
+        query = self.language.query(query_str)
+        captures = query.captures(class_node)
+
+        for captured_node, capture_name in captures:
+            if capture_name == 'variable_name':
+                variable_name = captured_node.text.decode('utf-8')
+                class_variables.append(variable_name)
+
+        return class_variables

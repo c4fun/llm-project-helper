@@ -38,38 +38,54 @@ def analyze_code_from_file(file_name):
         print(f'treesitter_result_nodes: {treesitter_result_nodes}')
 
         imports = treesitter_result_nodes.imports
-        for import_item in imports:
-            print(f'Import: {import_item.import_identifier, import_item.line_number, import_item.from_module}')
-            print(f'Import source code: {import_item.source_code}')
+        # for import_item in imports:
+        #     print(f'Import: {import_item.import_identifier, import_item.line_number, import_item.from_module}')
+        #     print(f'Import source code: {import_item.source_code}')
         
         classes = treesitter_result_nodes.classes
         for class_name, class_info in classes.items():
             print(f'Class name: {class_name}')
             print(f'Class info: {class_info}')
+            # print(f'Class source code: {class_info.source_code}')
+            print(f'Class line number: {class_info.line_number}')
+            print(f'Class end line number: {class_info.end_line_number}')
+            print(f'Class methods: {class_info.methods}')
+            print('Class methods:')
+            for method in class_info.methods:
+                print(f'Class Method name: {method.name}')
+                # print(f'Class Method line number: {method.line_number}')
+                # print(f'Class Method end line number: {method.end_line_number}')
+                # print(f'Class Method decorator_line_number: {method.decorator_line_number}')
+                # print(f'Class Method async: {method.async_method_flag}')
+                # print(f'Class Method parameters: {method.parameters}')
+                # print(f'Class Method variables: {method.method_variables}')
+                print()
+            print(f'Class variables: {class_info.class_variables}')
 
         functions = treesitter_result_nodes.functions
         for function in functions:
             method_name_for_terminal_print = utils.get_bold_text(function.name)
             print(f'Method name: {method_name_for_terminal_print}')
-            print(f'Method source code: {function.source_code}')
-            print(f'Method variables: {function.method_variables}')
-            print(f'Method parameters: {function.parameters}')
+            # print(f'Method source code: {function.source_code}')
+            # print(f'Method variables: {function.method_variables}')
+            # print(f'Method parameters: {function.parameters}')
 
-            print(f'Method line number: {function.line_number}')
-            print(f'Method end line number: {function.end_line_number}')
-            print(f'Method decorator_line_number: {function.decorator_line_number}')
+            # print(f'Method line number: {function.line_number}')
+            # print(f'Method end line number: {function.end_line_number}')
+            # print(f'Method decorator_line_number: {function.decorator_line_number}')
 
-            print(f'Method async: {function.async_method_flag}')
+            # print(f'Method async: {function.async_method_flag}')
 
 
 
 if __name__ == "__main__":
 
     # Example usage with a file path
-    # file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
-    file_name = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'
+    file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
+    # file_name = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'
     expanded_path = os.path.expanduser(file_name)
 
     result = analyze_code_from_file(expanded_path)
     json_result = json.dumps(result, indent=4)
     print(json_result)
+
