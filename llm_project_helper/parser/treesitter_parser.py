@@ -51,7 +51,16 @@ def analyze_code_from_file(file_name):
         for function in functions:
             method_name_for_terminal_print = utils.get_bold_text(function.name)
             print(f'Method name: {method_name_for_terminal_print}')
-            # print(f'Method source code: {function.source_code}')
+            print(f'Method source code: {function.source_code}')
+            print(f'Method variables: {function.method_variables}')
+            print(f'Method parameters: {function.parameters}')
+
+            print(f'Method line number: {function.line_number}')
+            print(f'Method end line number: {function.end_line_number}')
+            print(f'Method decorator_line_number: {function.decorator_line_number}')
+
+            print(f'Method async: {function.async_method_flag}')
+
 
 
 if __name__ == "__main__":
