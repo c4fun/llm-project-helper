@@ -13,6 +13,11 @@ TREE_JSON = True
 FORCE_RE_ANALYZE = False
 FORCE_RE_COMMENT = False
 
+from enum import Enum
+
+class Language(Enum):
+    PYTHON = "python"
+    UNKNOWN = "unknown"
 
 def get_llm_project_helper_package_root():
     """Get the root directory of the installed package."""
@@ -167,8 +172,25 @@ STRUCTURE_ANALYZE_PROMPT_JSON = """
 # 输入：对于文件的总结；代码。
 # 输出：对于这段代码的注释。
 CODE_SECTION_PROMPT_JSON = """
+## 代码结构分析
 给你一段用Markdown表示的对于某个代码文件的总结信息作为参考，来指导这个文件中某段代码的注释。注意这个信息只作为参考，如果有问题或者错误，以源代码为准：
 ```markdown```
-你的任务：对于下面这段源代码(一个类的方法，或者一个函数)用中文进行注释：只需要输出注释，不需要输出代码，不需要做任何额外解释。注释保持简单清晰，不需要逐行分析，不需要过于详细，在400字以内。
+
+# 你的任务：
+对于下面这段源代码(一个类的方法，或者一个函数)用中文进行注释：只需要输出注释，不要输出代码！不需要做任何额外解释。注释保持简单清晰，不需要逐行分析，不需要过于详细。输出控制在400字以内。
+
+"""
+
+CODE_CLASS_PROMPT_JSON = """
+## 代码结构分析
+给你一段用Markdown表示的对于某个代码文件的总结信息作为参考，来指导这个文件中某段代码的注释。注意这个信息只作为参考，如果有问题或者错误，以源代码和逐一方法注释为准：
+```markdown```
+
+## 逐个方法注释
+另外，我给你提供一段逐个方法的注释，它的准确度高于总结信息，你可以参考这段注释来更好地理解这个类。
+[|$|class_descendant_remarks|$|]
+
+# 你的任务
+对于当前类class进行总结：只需要输出类class的总结，不要输出代码！不需要做任何额外解释。注释保持简单清晰，不需要逐行分析，不需要过于详细。输出控制在400字以内。
 
 """
