@@ -69,10 +69,10 @@ class CodeSectionAnalyzer:
                         class_descendant_remarks += f"从 {start_line} 开始的方法:\n{remark}\n"
 
                 # 8. Get class summary info
-                class_prompt = class_prompt.replace(
+                cur_class_prompt = class_prompt.replace(
                     "[|$|class_descendant_remarks|$|]", class_descendant_remarks)
-                logger.debug(f"Class Prompt is: \n{class_prompt}")
-                class_chat_result = self.api.predict(class_prompt)
+                logger.debug(f"Class Prompt is: \n{cur_class_prompt}")
+                class_chat_result = self.api.predict(cur_class_prompt)
                 class_remark = class_chat_result.content
                 logger.info(f"Class Remark returned from LLM is: \n{class_remark}")
                 # 9. add class remarks and line numbers to the comments
