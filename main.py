@@ -48,7 +48,7 @@ if __name__ == '__main__':
     # logger.info(f"workspaces_dir: {workspaces_dir}")
 
     # 1. Doing the structure analyzation. LLM is not USED HERE
-    # TODO: try to parse using treesitter. change the parser from python_parser to treesitter parser
+    # DONE: try to parse using treesitter. change the parser from python_parser to treesitter parser
     analyze_folder = traverser.traverse_repo()
     logger.info(f"Analyze folder: {analyze_folder}")
 
