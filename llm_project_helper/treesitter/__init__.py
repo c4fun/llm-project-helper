@@ -3,5 +3,8 @@ from llm_project_helper.treesitter.treesitter import (Treesitter,
                                                       TreesitterResultNode,
                                                       TreesitterImportNode,
                                                       TreesitterClassNode,
-                                                      TreesitterGlobalVariableNode)
+                                                      TreesitterGeneralVariableNode,
+                                                      TreesitterGeneralParameterNode,
+                                                      TreesitterGlobalVariableNode,
+                                                      )
 from llm_project_helper.treesitter.treesitter_py import TreesitterPython

@@ -4,7 +4,7 @@ import os
 import json
 from pydantic import BaseModel
 from llm_project_helper import utils
-from llm_project_helper.treesitter import Treesitter, TreesitterMethodNode, TreesitterResultNode, TreesitterGlobalVariableNode
+from llm_project_helper.treesitter import Treesitter, TreesitterMethodNode, TreesitterResultNode
 from llm_project_helper.logs import logger
 
 

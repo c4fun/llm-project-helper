@@ -20,19 +20,21 @@ from llm_project_helper.logs import logger
 #         exclude.update({'node', 'source_code'})  # Automatically exclude these fields
 #         return super().model_dump(**kwargs, exclude=exclude)
 
-class TreesitterMethodVariableNode(BaseModel):
+class TreesitterGeneralVariableNode(BaseModel):
     name: str | bytes | None
     line_number: int
-    class Config:
-        arbitrary_types_allowed = True
+
+class TreesitterGeneralParameterNode(BaseModel):
+    name: str | bytes | None
+    line_number: int
 
 class TreesitterMethodNode(BaseModel):
     name: str | bytes | None
     doc_comment: str | None
     node: tree_sitter.Node = Field(..., exclude=True)
     source_code: str | None = Field(exclude=True)
-    method_variables: list[TreesitterMethodVariableNode] | None
-    parameters: list[str] | None
+    method_variables: list[TreesitterGeneralVariableNode] | None
+    parameters: list[TreesitterGeneralParameterNode] | None
     line_number: int
     end_line_number: int
     async_method_flag: bool
@@ -43,7 +45,7 @@ class TreesitterMethodNode(BaseModel):
 class TreesitterClassNode(BaseModel):
     name: str | bytes | None
     methods: dict[str, TreesitterMethodNode] | None
-    class_variables: list[str] | None
+    class_variables: list[TreesitterGeneralVariableNode] | None
     doc_comment: str | None
     line_number: int
     end_line_number: int
@@ -199,7 +201,11 @@ class Treesitter(ABC):
             if params_node:
                 for param in params_node.children:
                     if param.type == 'identifier':
-                        params.append(param.text.decode('utf-8'))
+                        line_number = param.start_point[0] + 1
+                        params.append(TreesitterGeneralParameterNode(
+                            name=param.text.decode('utf-8'),
+                            line_number=line_number
+                        ))
         return params
 
     def _check_async_method(self, node: tree_sitter.Node):
@@ -350,7 +356,11 @@ class Treesitter(ABC):
         for captured_node, capture_name in captures:
             if capture_name == 'variable_name':
                 variable_name = captured_node.text.decode('utf-8')
-                class_variables.append(variable_name)
+                line_number = captured_node.start_point[0] + 1
+                class_variables.append(TreesitterGeneralVariableNode(
+                    name=variable_name,
+                    line_number=line_number
+                ))
 
         return class_variables
 
