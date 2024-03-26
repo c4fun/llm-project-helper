@@ -44,6 +44,7 @@ class TreesitterMethodNode(BaseModel):
 
 class TreesitterClassNode(BaseModel):
     name: str | bytes | None
+    constructors: dict[str, TreesitterMethodNode] | None
     methods: dict[str, TreesitterMethodNode] | None
     class_variables: list[TreesitterGeneralVariableNode] | None
     doc_comment: str | None
@@ -308,6 +309,7 @@ class Treesitter(ABC):
 
                 classes[name] = TreesitterClassNode(
                     name=name,
+                    constructors=None,
                     methods=methods,
                     class_variables=class_variables,
                     doc_comment=doc_comment,

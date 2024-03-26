@@ -35,7 +35,7 @@ class TreesitterJava(Treesitter):
         # main_block=self._query_main_block(self.tree.root_node)
         # logger.debug(f'typeof main_block: {type(main_block)}')
         interfaces = self._query_interfaces(self.tree.root_node)
-        logger.info(f'typeof interfaces: {type(interfaces)}')
+        logger.debug(f'typeof interfaces: {type(interfaces)}')
 
         all_result = TreesitterResultNode(
             imports=imports,
@@ -147,15 +147,15 @@ class TreesitterJava(Treesitter):
                 name_node = captured_node.child_by_field_name('name')
                 if name_node:
                     name = name_node.text.decode('utf-8')
+                    constructors = self._query_constructors_with_class(captured_node)
                     methods = self._query_methods_within_class(captured_node)
-                    # Java 类中的变量也可能在这里处理
                     class_variables = self._extract_class_variables(captured_node)
-                    # TODO: 添加 doc_comment 的处理
                     line_number = captured_node.start_point[0] + 1
                     end_line_number = captured_node.end_point[0] + 1
 
                     classes[name] = TreesitterClassNode(
                         name=name,
+                        constructors=constructors,
                         methods=methods,
                         class_variables=class_variables,
                         doc_comment=None,  # Java 文档注释的处理
@@ -202,6 +202,47 @@ class TreesitterJava(Treesitter):
                         decorator_line_number=None  # Java 注解处理
                     )
         return functions
+
+
+    def _query_constructors_with_class(self, class_node: tree_sitter.Node):
+        result = {}
+        query = self.language.query("""
+            (constructor_declaration
+                name: (identifier) @constructor_name
+                parameters: (formal_parameters) @params
+                body: (constructor_body) @body
+            ) @constructor
+        """)
+        captures = query.captures(class_node)
+
+        counter = 0
+
+        for captured_node, _ in captures:
+            if captured_node.type == 'constructor_declaration':
+                name = self._query_method_name(captured_node) + str(counter)
+                doc_comment = None
+                method_variables = self._extract_method_variables(captured_node)
+                parameters = self._extract_parameters(captured_node)
+                line_number = captured_node.start_point[0] + 1
+                end_line_number = captured_node.end_point[0] + 1
+                async_method_flag = False
+                decorator_line_number = None
+
+                result[name] = TreesitterMethodNode(
+                    name=name,
+                    doc_comment=doc_comment,
+                    node=captured_node,
+                    source_code=captured_node.text.decode('utf-8'),
+                    method_variables=method_variables,
+                    parameters=parameters,
+                    line_number=line_number,
+                    end_line_number=end_line_number,
+                    async_method_flag=async_method_flag,
+                    decorator_line_number=decorator_line_number
+                )
+                counter += 1
+        return result
+
 
     def _query_methods_within_class(self, class_node: tree_sitter.Node):
         result = {}
@@ -280,7 +321,7 @@ class TreesitterJava(Treesitter):
 
     def _extract_parameters(self, node: tree_sitter.Node):
         params = []
-        if node.type in ['method_declaration']:
+        if node.type in ['method_declaration', 'constructor_declaration']:
             query_str = """
                 parameters: (formal_parameters
                     (formal_parameter
