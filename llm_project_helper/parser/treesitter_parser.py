@@ -46,18 +46,19 @@ def analyze_code_from_file(file_name):
             logger.debug(f'Class variables: {class_info.class_variables}')
 
         functions = treesitter_result_nodes.functions
-        for function_name, function in functions.items():
-            method_name_for_terminal_print = utils.get_bold_text(function.name)
-            logger.debug(f'Method name: {method_name_for_terminal_print}')
-            # logger.debug(f'Method source code: {function.source_code}')
-            logger.debug(f'Method variables: {function.method_variables}')
-            logger.debug(f'Method parameters: {function.parameters}')
+        if functions is not None:
+            for function_name, function in functions.items():
+                method_name_for_terminal_print = utils.get_bold_text(function.name)
+                logger.debug(f'Method name: {method_name_for_terminal_print}')
+                # logger.debug(f'Method source code: {function.source_code}')
+                logger.debug(f'Method variables: {function.method_variables}')
+                logger.debug(f'Method parameters: {function.parameters}')
 
-            logger.debug(f'Method line number: {function.line_number}')
-            logger.debug(f'Method end line number: {function.end_line_number}')
-            logger.debug(f'Method decorator_line_number: {function.decorator_line_number}')
+                logger.debug(f'Method line number: {function.line_number}')
+                logger.debug(f'Method end line number: {function.end_line_number}')
+                logger.debug(f'Method decorator_line_number: {function.decorator_line_number}')
 
-            logger.debug(f'Method async: {function.async_method_flag}')
+                logger.debug(f'Method async: {function.async_method_flag}')
 
         # In java, the global_variables is N/A; and the main_block is not implemented
         global_variables = treesitter_result_nodes.global_variables

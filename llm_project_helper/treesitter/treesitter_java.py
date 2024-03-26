@@ -27,8 +27,8 @@ class TreesitterJava(Treesitter):
         logger.debug(f'typeof imports: {type(imports)}')
         classes=self._query_classes(self.tree.root_node)
         logger.debug(f'typeof classes: {type(classes)}')
-        functions=self._query_functions(self.tree.root_node)
-        logger.debug(f'typeof functions: {type(functions)}')
+        # functions=self._query_functions(self.tree.root_node)
+        # logger.debug(f'typeof functions: {type(functions)}')
         # global_variables=self._query_global_variables(self.tree.root_node)
         # logger.debug(f'typeof global_variables: {type(global_variables)}')
         # main_block=self._query_main_block(self.tree.root_node)
@@ -37,7 +37,7 @@ class TreesitterJava(Treesitter):
         all_result = TreesitterResultNode(
             imports=imports,
             classes=classes,
-            functions=functions,
+            functions=None,
             global_variables=None,
             main_block=None,
         )
