@@ -9,7 +9,8 @@ from llm_project_helper.treesitter.treesitter import (Treesitter,
                                                       TreesitterImportNode,
                                                       TreesitterGlobalVariableNode,
                                                       TreesitterMainBlockNode,
-                                                      TreesitterResultNode,)
+                                                      TreesitterResultNode,
+                                                      TreesitterInferfaceNode,)
 from llm_project_helper.treesitter.treesitter_registry import TreesitterRegistry
 from llm_project_helper.logs import logger
 
@@ -33,6 +34,8 @@ class TreesitterJava(Treesitter):
         # logger.debug(f'typeof global_variables: {type(global_variables)}')
         # main_block=self._query_main_block(self.tree.root_node)
         # logger.debug(f'typeof main_block: {type(main_block)}')
+        interfaces = self._query_interfaces(self.tree.root_node)
+        logger.info(f'typeof interfaces: {type(interfaces)}')
 
         all_result = TreesitterResultNode(
             imports=imports,
@@ -40,6 +43,7 @@ class TreesitterJava(Treesitter):
             functions=None,
             global_variables=None,
             main_block=None,
+            interfaces=interfaces,
         )
         # logger.debug(f'all_result: {all_result}')
         return all_result
@@ -59,6 +63,73 @@ class TreesitterJava(Treesitter):
             ))
         logger.debug(f'imports: {imports}')
         return imports
+
+    def _query_interfaces(self, node: tree_sitter.Node) -> dict:
+        interfaces = {}
+        query_str = """
+            (interface_declaration
+                name: (identifier) @interface_name
+                body: (interface_body) @body
+            )@interface
+        """
+        query = self.language.query(query_str)
+        captures = query.captures(node)
+
+        for captured_node, capture_name in captures:
+            if capture_name == 'interface':
+                name_node = captured_node.child_by_field_name('name')
+                if name_node:
+                    name = name_node.text.decode('utf-8')
+                    methods = self._query_methods_within_interface(captured_node)
+                    interface_variables = self._extract_class_variables(captured_node)
+                    line_number = captured_node.start_point[0] + 1
+                    end_line_number = captured_node.end_point[0] + 1
+
+                    interfaces[name] = TreesitterInferfaceNode(
+                        name=name,
+                        methods=methods,
+                        interface_variables=interface_variables,
+                        line_number=line_number,
+                        end_line_number=end_line_number,
+                        node=captured_node,
+                        source_code=None
+                    )
+        return interfaces
+    
+    def _query_methods_within_interface(self, interface_node: tree_sitter.Node):
+        result = {}
+        query = self.language.query("""
+            (method_declaration
+                name: (identifier) @function_name
+                parameters: (formal_parameters) @params
+            ) @function
+        """)
+        captures = query.captures(interface_node)
+
+        for captured_node, _ in captures:
+            if captured_node.type == 'method_declaration':
+                name = self._query_method_name(captured_node)
+                doc_comment = None
+                method_variables = None
+                parameters = self._extract_parameters(captured_node)
+                line_number = captured_node.start_point[0] + 1
+                end_line_number = captured_node.end_point[0] + 1
+                async_method_flag = False
+                decorator_line_number = None
+
+                result[name] = TreesitterMethodNode(
+                    name=name,
+                    doc_comment=doc_comment,
+                    node=captured_node,
+                    source_code=captured_node.text.decode('utf-8'),
+                    method_variables=method_variables,
+                    parameters=parameters,
+                    line_number=line_number,
+                    end_line_number=end_line_number,
+                    async_method_flag=async_method_flag,
+                    decorator_line_number=decorator_line_number
+                )
+        return result
 
     def _query_classes(self, node: tree_sitter.Node) -> dict:
         classes = {}

@@ -89,9 +89,11 @@ if __name__ == "__main__":
     # file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
     # file_name = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'
     # file_name = '~/code/github.com/geekan/MetaGPT/setup.py'
-    # file_name = '~/code/github.com/geekan/MetaGPT/tests/metagpttools/test_azure_tts.py'
 
-    file_name = '~/code/github.com/rvesse/airline/airline-prompts/src/main/java/com/github/rvesse/airline/prompts/Prompt.java'
+    # file_name = '~/code/github.com/rvesse/airline/airline-prompts/src/main/java/com/github/rvesse/airline/prompts/Prompt.java'
+    # file_name = '~/code/github.com/rvesse/airline/airline-core/src/main/java/com/github/rvesse/airline/Accessor.java'
+    file_name = '~/code/github.com/rvesse/airline/airline-core/src/main/java/com/github/rvesse/airline/ChannelFactory.java'
+
     expanded_path = os.path.expanduser(file_name)
 
     result = analyze_code_from_file(expanded_path)
