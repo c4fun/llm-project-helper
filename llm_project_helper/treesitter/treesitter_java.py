@@ -187,22 +187,48 @@ class TreesitterJava(Treesitter):
                 return captured_node.start_point[0] + 1
         return None
 
-
-
     def _extract_method_variables(self, node: tree_sitter.Node):
         # Example: Extract variables declared at the start of a function
         variables = []
-        query = self.language.query("""
-            (method_declaration body: (block (expression_statement (assignment_expression) @assignment)))
-        """)
+        query_str = """
+            declarator: (variable_declarator
+                name: (identifier) @variable_name
+            )
+        """
+        query = self.language.query(query_str)
         captures = query.captures(node)
-        for captured_node, _ in captures:
-            variable_name = captured_node.child_by_field_name('left').text.decode('utf-8')
-            # retrieve the line_number of the variable
-            line_number = captured_node.start_point[0] + 1
-            # append the variable_name and line_number to a dict
-            variables.append({'name': variable_name, 'line_number': line_number})
+        for captured_node, capture_name in captures:
+            if capture_name == 'variable_name':
+                variable_name = captured_node.text.decode('utf-8')
+                line_number = captured_node.start_point[0] + 1
+                variables.append(TreesitterGeneralVariableNode(
+                    name=variable_name,
+                    line_number=line_number
+                ))
         return variables
+
+    def _extract_parameters(self, node: tree_sitter.Node):
+        params = []
+        if node.type in ['method_declaration']:
+            query_str = """
+                parameters: (formal_parameters
+                    (formal_parameter
+                        name: (identifier) @param_name
+                    )
+                )
+            """
+            query = self.language.query(query_str)
+            captures = query.captures(node)
+            for captured_node, capture_name in captures:
+                if capture_name == 'param_name':
+                    param_name = captured_node.text.decode('utf-8')
+                    line_number = captured_node.start_point[0] + 1
+                    params.append(TreesitterGeneralParameterNode(
+                        name=param_name,
+                        line_number=line_number
+                    ))
+
+        return params
 
     def _extract_class_variables(self, class_node: tree_sitter.Node):
         class_variables = []
