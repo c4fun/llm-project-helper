@@ -59,15 +59,18 @@ def analyze_code_from_file(file_name):
 
             logger.debug(f'Method async: {function.async_method_flag}')
 
+        # In java, the global_variables is N/A; and the main_block is not implemented
         global_variables = treesitter_result_nodes.global_variables
-        for global_variable in global_variables:
-            logger.debug(f'Global variable: {global_variable.name}')
-            logger.debug(f'Global variable line number: {global_variable.line_number}')
+        if global_variables is not None:
+            for global_variable in global_variables:
+                logger.debug(f'Global variable: {global_variable.name}')
+                logger.debug(f'Global variable line number: {global_variable.line_number}')
 
         main_block = treesitter_result_nodes.main_block
-        logger.debug(f'Main block: {main_block}')
-        # logger.debug(f'Main block source code: {main_block.source_code}')
-        
+        if main_block is not None:
+            logger.debug(f'Main block: {main_block}')
+            logger.debug(f'Main block source code: {main_block.source_code}')
+
         # result = {
         #     "imports": imports,
         #     "classes": classes,
@@ -83,9 +86,11 @@ if __name__ == "__main__":
 
     # Example usage with a file path
     # file_name = '~/code/github.com/c4fun/zhipuai-playground/samples/gradio-glm4.py'
-    file_name = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'
+    # file_name = '~/code/github.com/geekan/MetaGPT/metagpt/provider/zhipuai_api.py'
     # file_name = '~/code/github.com/geekan/MetaGPT/setup.py'
-    # file_name = '~/code/github.com/geekan/MetaGPT/tests/metagpt/tools/test_azure_tts.py'
+    # file_name = '~/code/github.com/geekan/MetaGPT/tests/metagpttools/test_azure_tts.py'
+
+    file_name = '~/code/github.com/rvesse/airline/airline-prompts/src/main/java/com/github/rvesse/airline/prompts/Prompt.java'
     expanded_path = os.path.expanduser(file_name)
 
     result = analyze_code_from_file(expanded_path)
