@@ -16,6 +16,7 @@ def get_programming_language(file_extension: str) -> Language:
     """
     language_mapping = {
         ".py": Language.PYTHON,
+        ".java": Language.JAVA,
     }
     return language_mapping.get(file_extension, Language.UNKNOWN)
 

@@ -17,6 +17,7 @@ from enum import Enum
 
 class Language(Enum):
     PYTHON = "python"
+    JAVA = "java"
     UNKNOWN = "unknown"
 
 def get_llm_project_helper_package_root():

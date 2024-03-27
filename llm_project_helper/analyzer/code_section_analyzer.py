@@ -114,9 +114,10 @@ class CodeSectionAnalyzer:
 
     def process_functions(self, functions):
         res = []
-        for func_name, details in functions.items():
-            line_number = details["line_number"]
-            end_line_number = details["end_line_number"]
-            # contstruct a line_no, end_line_no pair
-            res.append((line_number, end_line_number))
+        if functions is not None:
+            for func_name, details in functions.items():
+                line_number = details["line_number"]
+                end_line_number = details["end_line_number"]
+                # contstruct a line_no, end_line_no pair
+                res.append((line_number, end_line_number))
         return res

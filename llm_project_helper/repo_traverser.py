@@ -1,12 +1,13 @@
 import os
 import json
+from llm_project_helper import utils
 from dotenv import load_dotenv
 from llm_project_helper.parser.python_parser import python_analyze_code
 from llm_project_helper.parser.treesitter_parser import analyze_code_from_file
 from llm_project_helper.logs import logger
 from llm_project_helper.analyzer.file_summary_analyzer import FileSummaryAnalyzer
 from llm_project_helper.analyzer.code_section_analyzer import CodeSectionAnalyzer
-from llm_project_helper.const import TREE_JSON, FORCE_RE_ANALYZE, FORCE_RE_COMMENT, AVAILABLE_SAAS, WORKSPACE_DIR
+from llm_project_helper.const import TREE_JSON, FORCE_RE_ANALYZE, FORCE_RE_COMMENT, AVAILABLE_SAAS, WORKSPACE_DIR, Language
 
 load_dotenv()
 
@@ -55,8 +56,9 @@ class RepoTraverser:
 
         for root, dirs, files in os.walk(self.repo_path):
             for file in files:
-                # judge if the file ends with *.py, if not, continue
-                if not file.endswith(".py"):
+                file_extension = utils.get_file_extension(file)
+                programming_language = utils.get_programming_language(file_extension)
+                if programming_language is Language.UNKNOWN:
                     continue
                 file_path = os.path.join(root, file)
                 relative_path = os.path.relpath(file_path, self.repo_path)

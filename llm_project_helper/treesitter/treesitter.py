@@ -44,6 +44,7 @@ class TreesitterMethodNode(BaseModel):
 
 class TreesitterClassNode(BaseModel):
     name: str | bytes | None
+    constructors: dict[str, TreesitterMethodNode] | None
     methods: dict[str, TreesitterMethodNode] | None
     class_variables: list[TreesitterGeneralVariableNode] | None
     doc_comment: str | None
@@ -51,6 +52,17 @@ class TreesitterClassNode(BaseModel):
     end_line_number: int
     node: tree_sitter.Node = Field(..., exclude=True)
     source_code: str | None = Field(exclude=True)
+    class Config:
+        arbitrary_types_allowed = True
+
+class TreesitterInferfaceNode(BaseModel):
+    line_number: int
+    end_line_number: int
+    name: str | bytes | None
+    methods: dict[str, TreesitterMethodNode] | None
+    node: tree_sitter.Node = Field(..., exclude=True)
+    source_code: str | None = Field(exclude=True)
+    interface_variables: list[TreesitterGeneralVariableNode] | None
     class Config:
         arbitrary_types_allowed = True
 
@@ -80,6 +92,7 @@ class TreesitterResultNode(BaseModel):
     functions: dict[str, TreesitterMethodNode] | None
     global_variables: list[TreesitterGlobalVariableNode] | None
     main_block: TreesitterMainBlockNode | None
+    interfaces: dict[str, TreesitterInferfaceNode] | None
     class Config:
         arbitrary_types_allowed = True
 
@@ -116,6 +129,8 @@ class Treesitter(ABC):
         logger.debug(f'typeof global_variables: {type(global_variables)}')
         main_block=self._query_main_block(self.tree.root_node)
         logger.debug(f'typeof main_block: {type(main_block)}')
+        # interfaces=self._query_interfaces(self.tree.root_node)
+        # logger.debug(f'typeof interfaces: {type(interfaces)}')
 
         all_result = TreesitterResultNode(
             imports=imports,
@@ -123,11 +138,15 @@ class Treesitter(ABC):
             functions=functions,
             global_variables=global_variables,
             main_block=main_block,
+            interfaces=None,
         )
         # logger.debug(f'all_result: {all_result}')
         return all_result
     
-    def _query_functions(self, node: tree_sitter.Node) -> list:
+    def _query_interfaces(self, node: tree_sitter.Node):
+        return None
+    
+    def _query_functions(self, node: tree_sitter.Node) -> dict:
         result = {}
         query = self.language.query("""
             (function_definition
@@ -290,6 +309,7 @@ class Treesitter(ABC):
 
                 classes[name] = TreesitterClassNode(
                     name=name,
+                    constructors=None,
                     methods=methods,
                     class_variables=class_variables,
                     doc_comment=doc_comment,
