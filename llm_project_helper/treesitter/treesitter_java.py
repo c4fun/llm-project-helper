@@ -219,7 +219,7 @@ class TreesitterJava(Treesitter):
 
         for captured_node, _ in captures:
             if captured_node.type == 'constructor_declaration':
-                name = self._query_method_name(captured_node) + str(counter)
+                name = self._query_method_name(captured_node)
                 doc_comment = None
                 method_variables = self._extract_method_variables(captured_node)
                 parameters = self._extract_parameters(captured_node)
@@ -228,18 +228,32 @@ class TreesitterJava(Treesitter):
                 async_method_flag = False
                 decorator_line_number = None
 
-                result[name] = TreesitterMethodNode(
-                    name=name,
-                    doc_comment=doc_comment,
-                    node=captured_node,
-                    source_code=captured_node.text.decode('utf-8'),
-                    method_variables=method_variables,
-                    parameters=parameters,
-                    line_number=line_number,
-                    end_line_number=end_line_number,
-                    async_method_flag=async_method_flag,
-                    decorator_line_number=decorator_line_number
-                )
+                if name not in result:
+                    result[name] = TreesitterMethodNode(
+                        name=name,
+                        doc_comment=doc_comment,
+                        node=captured_node,
+                        source_code=captured_node.text.decode('utf-8'),
+                        method_variables=method_variables,
+                        parameters=parameters,
+                        line_number=line_number,
+                        end_line_number=end_line_number,
+                        async_method_flag=async_method_flag,
+                        decorator_line_number=decorator_line_number
+                    )
+                else:
+                    result[name + str(counter)] = TreesitterMethodNode(
+                        name=name,
+                        doc_comment=doc_comment,
+                        node=captured_node,
+                        source_code=captured_node.text.decode('utf-8'),
+                        method_variables=method_variables,
+                        parameters=parameters,
+                        line_number=line_number,
+                        end_line_number=end_line_number,
+                        async_method_flag=async_method_flag,
+                        decorator_line_number=decorator_line_number
+                    )
                 counter += 1
         return result
 
