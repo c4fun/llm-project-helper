@@ -86,6 +86,7 @@ class TreesitterMainBlockNode(BaseModel):
     source_code: str | None
     class Config:
         arbitrary_types_allowed = True
+
 class TreesitterResultNode(BaseModel):
     imports: list[TreesitterImportNode] | None
     classes: dict[str, TreesitterClassNode] | None
