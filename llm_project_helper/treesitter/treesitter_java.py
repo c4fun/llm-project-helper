@@ -266,18 +266,36 @@ class TreesitterJava(Treesitter):
                 async_method_flag = self._check_async_method(captured_node)
                 decorator_line_number = self._extract_decorator_line_number(captured_node)
 
-                result[name] = TreesitterMethodNode(
-                    name=name,
-                    doc_comment=doc_comment,
-                    node=captured_node,
-                    source_code=captured_node.text.decode('utf-8'),
-                    method_variables=method_variables,
-                    parameters=parameters,
-                    line_number=line_number,
-                    end_line_number=end_line_number,
-                    async_method_flag=async_method_flag,
-                    decorator_line_number=decorator_line_number
-                )
+                # if result[name] does not exist, then add in the dictionary
+                if name not in result:
+                    result[name] = TreesitterMethodNode(
+                        name=name,
+                        doc_comment=doc_comment,
+                        node=captured_node,
+                        source_code=captured_node.text.decode('utf-8'),
+                        method_variables=method_variables,
+                        parameters=parameters,
+                        line_number=line_number,
+                        end_line_number=end_line_number,
+                        async_method_flag=async_method_flag,
+                        decorator_line_number=decorator_line_number
+                    )
+                else:
+                    # if result[name] exists, append all parameter's name to the existing name, separated by -
+                    new_name = name + '-' + '-'.join([param.name for param in parameters])
+
+                    result[new_name] = TreesitterMethodNode(
+                        name=name,
+                        doc_comment=doc_comment,
+                        node=captured_node,
+                        source_code=captured_node.text.decode('utf-8'),
+                        method_variables=method_variables,
+                        parameters=parameters,
+                        line_number=line_number,
+                        end_line_number=end_line_number,
+                        async_method_flag=async_method_flag,
+                        decorator_line_number=decorator_line_number
+                    )
         return result
 
     def _query_method_name(self, node: tree_sitter.Node):
